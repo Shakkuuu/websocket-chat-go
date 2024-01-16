@@ -28,7 +28,7 @@
             }
             const roomIdInput = prompt("Enter room ID:");
             if (roomIdInput) {
-                const message = { roomID: roomIdInput};
+                const message = { roomID: roomIdInput, name: Name};
                 roomid = roomIdInput
                 document.getElementById("current_server").textContent = roomid
                 socket.send(JSON.stringify(message));
