@@ -16,8 +16,9 @@ type ChatRoom struct {
 }
 
 type Data struct {
-	Rooms  []string
-	RoomID string
+	Rooms   []string
+	RoomID  string
+	Message string
 }
 
 var rooms = make(map[string]*ChatRoom)
@@ -44,43 +45,101 @@ func main() {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("index.html")
-	if err != nil {
-		log.Printf("template.ParseFiles error:%v\n", err)
-	}
+	switch r.Method {
+	case http.MethodGet:
+		t, err := template.ParseFiles("index.html")
+		if err != nil {
+			log.Printf("template.ParseFiles error:%v\n", err)
+		}
 
-	var data Data
-	for k := range rooms {
-		data.Rooms = append(data.Rooms, k)
-	}
+		var data Data
+		for k := range rooms {
+			data.Rooms = append(data.Rooms, k)
+		}
 
-	err = t.Execute(w, data)
-	if err != nil {
-		log.Printf("Excute error:%v\n", err)
+		err = t.Execute(w, data)
+		if err != nil {
+			log.Printf("Excute error:%v\n", err)
+		}
+	case http.MethodPost:
+		r.ParseForm()
+		roomid := r.FormValue("create_roomid")
+
+		fmt.Println("aaaaa:" + roomid)
+
+		createRoom(roomid)
+
+		t, err := template.ParseFiles("index.html")
+		if err != nil {
+			log.Printf("template.ParseFiles error:%v\n", err)
+		}
+
+		var data Data
+		for k := range rooms {
+			data.Rooms = append(data.Rooms, k)
+		}
+		data.RoomID = roomid
+		data.Message = "ルーム " + roomid + " が作成されました。"
+
+		err = t.Execute(w, data)
+		if err != nil {
+			log.Printf("Excute error:%v\n", err)
+		}
+	default:
+		fmt.Fprintln(w, "Method not allowed")
 	}
 }
 
 func room(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("room.html")
-	if err != nil {
-		log.Printf("template.ParseFiles error:%v\n", err)
-	}
+	switch r.Method {
+	case http.MethodGet:
+		r.ParseForm()
+		roomid := r.URL.Query().Get("roomid")
 
-	err = t.Execute(w, nil)
-	if err != nil {
-		log.Printf("Excute error:%v\n", err)
+		_, exists := rooms[roomid]
+		if !exists {
+			log.Printf("This room was not found")
+
+			t, err := template.ParseFiles("index.html")
+			if err != nil {
+				log.Printf("template.ParseFiles error:%v\n", err)
+			}
+
+			var data Data
+			for k := range rooms {
+				data.Rooms = append(data.Rooms, k)
+			}
+			data.Message = "そのIDのルームは見つかりませんでした。"
+
+			err = t.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+			}
+			return
+		}
+
+		t, err := template.ParseFiles("room.html")
+		if err != nil {
+			log.Printf("template.ParseFiles error:%v\n", err)
+		}
+
+		err = t.Execute(w, nil)
+		if err != nil {
+			log.Printf("Excute error:%v\n", err)
+		}
+	default:
+		fmt.Fprintln(w, "Method not allowed")
 	}
 }
 
-func createRoom() *ChatRoom {
-	roomID := fmt.Sprintf("%d", len(rooms)+1)
+func createRoom(roomid string) {
+	// roomID := fmt.Sprintf("%d", len(rooms)+1)
 	room := &ChatRoom{
-		ID:      roomID,
+		ID:      roomid,
 		Clients: make(map[*websocket.Conn]bool),
 	}
 	fmt.Printf("room %v が作成されました\n", room.ID)
-	rooms[roomID] = room
-	return room
+	rooms[roomid] = room
 }
 
 func handleConnection(ws *websocket.Conn) {
@@ -95,7 +154,9 @@ func handleConnection(ws *websocket.Conn) {
 
 	room, exists := rooms[msg.RoomID]
 	if !exists {
-		room = createRoom()
+		// room = createRoom()
+		log.Printf("This room was not found")
+		return
 	}
 
 	entermsg := Message{RoomID: room.ID, Message: msg.Name + "が入室しました", Name: "Server"}

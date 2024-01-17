@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <title>sample</title>
     <script>
-        let roomid = 0
+        let roomid = ""
         let Name = ""
         // サーバーに接続
         window.onload = function () {
@@ -27,7 +27,7 @@
             }
             let url_string = location.href;
             let url = new URL(url_string);
-            let roomid = url.searchParams.get("roomid");
+            roomid = url.searchParams.get("roomid");
             const message = { roomID: roomid, name: Name};
             document.getElementById("current_server").textContent = roomid
             socket.send(JSON.stringify(message));
@@ -68,6 +68,8 @@
 </head>
 <body>
 
+{{.Message}}
+
 <h2>現在のサーバー</h2>
 <p id="current_server"></p>
 
@@ -76,7 +78,7 @@
 
 <!-- 送信欄 -->
 <p>メッセージを入力してください。</p>
-<input type="text" id="message" /><button onclick="send()">送信</button>
+<input type="text" id="message"><button onclick="send()">送信</button>
 
 <!-- メッセージ欄 -->
 <h2>メッセージ一覧</h2>
