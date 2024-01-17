@@ -50,6 +50,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 		t, err := template.ParseFiles("index.html")
 		if err != nil {
 			log.Printf("template.ParseFiles error:%v\n", err)
+			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+			return
 		}
 
 		var data Data
@@ -60,6 +62,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 		err = t.Execute(w, data)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
+			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+			return
 		}
 	case http.MethodPost:
 		r.ParseForm()
@@ -71,6 +75,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 			t, err := template.ParseFiles("index.html")
 			if err != nil {
 				log.Printf("template.ParseFiles error:%v\n", err)
+				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+				return
 			}
 
 			var data Data
@@ -82,6 +88,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 			err = t.Execute(w, data)
 			if err != nil {
 				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
 			}
 			return
 		}
@@ -91,6 +99,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 		t, err := template.ParseFiles("index.html")
 		if err != nil {
 			log.Printf("template.ParseFiles error:%v\n", err)
+			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+			return
 		}
 
 		var data Data
@@ -102,9 +112,13 @@ func index(w http.ResponseWriter, r *http.Request) {
 		err = t.Execute(w, data)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
+			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+			return
 		}
 	default:
 		fmt.Fprintln(w, "Method not allowed")
+		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
+		return
 	}
 }
 
@@ -121,6 +135,8 @@ func room(w http.ResponseWriter, r *http.Request) {
 			t, err := template.ParseFiles("index.html")
 			if err != nil {
 				log.Printf("template.ParseFiles error:%v\n", err)
+				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+				return
 			}
 
 			var data Data
@@ -132,6 +148,8 @@ func room(w http.ResponseWriter, r *http.Request) {
 			err = t.Execute(w, data)
 			if err != nil {
 				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
 			}
 			return
 		}
@@ -139,14 +157,20 @@ func room(w http.ResponseWriter, r *http.Request) {
 		t, err := template.ParseFiles("room.html")
 		if err != nil {
 			log.Printf("template.ParseFiles error:%v\n", err)
+			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+			return
 		}
 
 		err = t.Execute(w, nil)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
+			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+			return
 		}
 	default:
 		fmt.Fprintln(w, "Method not allowed")
+		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
+		return
 	}
 }
 
@@ -171,7 +195,6 @@ func handleConnection(ws *websocket.Conn) {
 
 	room, exists := rooms[msg.RoomID]
 	if !exists {
-		// room = createRoom()
 		log.Printf("This room was not found")
 		return
 	}
@@ -192,7 +215,6 @@ func handleConnection(ws *websocket.Conn) {
 		if err != nil {
 			if err.Error() == "EOF" {
 				log.Printf("EOF error:%v\n", err)
-				// clients[ws] = false
 				delete(room.Clients, ws)
 				exitmsg := Message{RoomID: msg.RoomID, Message: msg.Name + "が退出しました", Name: "Server"}
 				broadcast <- exitmsg
