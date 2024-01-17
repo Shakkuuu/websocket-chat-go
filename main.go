@@ -65,7 +65,27 @@ func index(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		roomid := r.FormValue("create_roomid")
 
-		fmt.Println("aaaaa:" + roomid)
+		_, exists := rooms[roomid]
+		if exists { // roomが既に存在していたら
+			// 作成失敗メッセージ表示
+			t, err := template.ParseFiles("index.html")
+			if err != nil {
+				log.Printf("template.ParseFiles error:%v\n", err)
+			}
+
+			var data Data
+			for k := range rooms {
+				data.Rooms = append(data.Rooms, k)
+			}
+			// data.RoomID = roomid
+			data.Message = "ルーム " + roomid + " は既にあります"
+
+			err = t.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+			}
+			return
+		}
 
 		createRoom(roomid)
 
@@ -78,7 +98,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 		for k := range rooms {
 			data.Rooms = append(data.Rooms, k)
 		}
-		data.RoomID = roomid
+		// data.RoomID = roomid
 		data.Message = "ルーム " + roomid + " が作成されました。"
 
 		err = t.Execute(w, data)
