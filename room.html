@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <title>sample</title>
+    <script>
+        let roomid = 0
+        let Name = ""
+        // サーバーに接続
+        window.onload = function () {
+            socket = new WebSocket("ws://localhost:8000/ws");
+            socket.onopen = function () {
+                joinRoom();
+            };
+            socket.onmessage = function (event) {
+                // サーバーからメッセージを受け取る
+                const msg = JSON.parse(event.data);
+                updateMessage(msg.roomID, msg.message, msg.name);
+            };
+        };
+
+        function joinRoom() {
+            const NameInput = prompt("Enter your Name:");
+            if (NameInput) {
+                Name = NameInput
+                document.getElementById("username").textContent = Name
+            }
+            let url_string = location.href;
+            let url = new URL(url_string);
+            let roomid = url.searchParams.get("roomid");
+            const message = { roomID: roomid, name: Name};
+            document.getElementById("current_server").textContent = roomid
+            socket.send(JSON.stringify(message));
+        }
+
+        // メッセージ欄を更新する
+        function updateMessage(roomID, message, name) {
+            let listName = document.createElement("li");
+            let nameText = document.createTextNode(roomID + " : " + name);
+            listName.appendChild(nameText);
+
+            let messages = document.createElement("ul");
+
+            let listMessage = document.createElement("li");
+            let messageText = document.createTextNode(message);
+            listMessage.appendChild(messageText);
+
+            messages.appendChild(listMessage);
+
+            listName.appendChild(messages);
+
+            let ul = document.getElementById("messages");
+            ul.appendChild(listName);
+        }
+
+        // サーバーにメッセージを送信する
+        function send() {
+            let sendMessage = document.getElementById("message");
+            let msg = sendMessage.value;
+            if (msg == "") {
+                return;
+            }
+            const message = { roomID: roomid, message: msg, name : Name};
+            socket.send(JSON.stringify(message));
+            sendMessage.value = "";
+        }
+    </script>
+</head>
+<body>
+
+<h2>現在のサーバー</h2>
+<p id="current_server"></p>
+
+<h2>ユーザー名</h2>
+<p id="username"></p>
+
+<!-- 送信欄 -->
+<p>メッセージを入力してください。</p>
+<input type="text" id="message" /><button onclick="send()">送信</button>
+
+<!-- メッセージ欄 -->
+<h2>メッセージ一覧</h2>
+<ul id="messages"></ul>
+
+<p><a href="/">戻る</a></p>
+
+</body>
+</html>
