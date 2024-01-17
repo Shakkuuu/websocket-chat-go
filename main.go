@@ -16,12 +16,12 @@ type ChatRoom struct {
 }
 
 type Data struct {
-	Rooms []string
+	Rooms  []string
+	RoomID string
 }
 
 var rooms = make(map[string]*ChatRoom)
 
-// var clients = make(map[*websocket.Conn]bool)
 var broadcast = make(chan Message)
 
 type Message struct {
@@ -32,6 +32,7 @@ type Message struct {
 
 func main() {
 	http.HandleFunc("/", index)
+	http.HandleFunc("/room", room)
 	http.Handle("/ws", websocket.Handler(handleConnection))
 	go handleMessages()
 
@@ -54,6 +55,18 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = t.Execute(w, data)
+	if err != nil {
+		log.Printf("Excute error:%v\n", err)
+	}
+}
+
+func room(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("room.html")
+	if err != nil {
+		log.Printf("template.ParseFiles error:%v\n", err)
+	}
+
+	err = t.Execute(w, nil)
 	if err != nil {
 		log.Printf("Excute error:%v\n", err)
 	}

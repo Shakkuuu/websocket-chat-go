@@ -4,68 +4,16 @@
     <meta charset="UTF-8" />
     <title>sample</title>
     <script>
-        let roomid = 0
-        let Name = ""
-        // サーバーに接続
-        window.onload = function () {
-            socket = new WebSocket("ws://localhost:8000/ws");
-            socket.onopen = function () {
-                joinRoom();
-            };
-            socket.onmessage = function (event) {
-                // サーバーからメッセージを受け取る
-                const msg = JSON.parse(event.data);
-                updateMessage(msg.roomID, msg.message, msg.name);
-                // updateMessage("サーバー", event.data);
-            };
-        };
-
-        function joinRoom() {
-            const NameInput = prompt("Enter your Name:");
-            if (NameInput) {
-                Name = NameInput
-                document.getElementById("username").textContent = Name
-            }
-            const roomIdInput = prompt("Enter room ID:");
-            if (roomIdInput) {
-                const message = { roomID: roomIdInput, name: Name};
-                roomid = roomIdInput
-                document.getElementById("current_server").textContent = roomid
-                socket.send(JSON.stringify(message));
-            }
-        }
-
-        // メッセージ欄を更新する
-        function updateMessage(roomID, message, name) {
-            let listName = document.createElement("li");
-            let nameText = document.createTextNode(roomID + " : " + name);
-            listName.appendChild(nameText);
-
-            let messages = document.createElement("ul");
-
-            let listMessage = document.createElement("li");
-            let messageText = document.createTextNode(message);
-            listMessage.appendChild(messageText);
-
-            messages.appendChild(listMessage);
-
-            listName.appendChild(messages);
-
-            let ul = document.getElementById("messages");
-            ul.appendChild(listName);
-        }
-
-        // サーバーにメッセージを送信する
-        function send() {
-            let sendMessage = document.getElementById("message");
-            let msg = sendMessage.value;
-            if (msg == "") {
+        // サーバーページに遷移
+        function enterRoom() {
+            let sendroomid = document.getElementById("roomid");
+            let rid = sendroomid.value;
+            if (rid == "") {
                 return;
             }
-            const message = { roomID: roomid, message: msg, name : Name};
-            socket.send(JSON.stringify(message));
-            // updateMessage("あなた", msg, Name);
-            sendMessage.value = "";
+            window.location.href = 'http://localhost:8000/room?roomid=' + rid;
+
+            sendroomid.value = "";
         }
     </script>
 </head>
@@ -73,23 +21,11 @@
 
 <h2>Room一覧</h2>
 {{range $v := .Rooms}}
-
     <p>{{$v}}</p>
 {{end}}
 
-<h2>現在のサーバー</h2>
-<p id="current_server"></p>
-
-<h2>ユーザー名</h2>
-<p id="username"></p>
-
-<!-- 送信欄 -->
-<p>メッセージを入力してください。</p>
-<input type="text" id="message" /><button onclick="send()">送信</button>
-
-<!-- メッセージ欄 -->
-<h2>メッセージ一覧</h2>
-<ul id="messages"></ul>
+<p>参加するチャットルームのIDを入力してください。</p>
+<input type="number" id="roomid" /><button onclick="enterRoom()">参加</button>
 
 </body>
 </html>
