@@ -77,7 +77,6 @@ func index(w http.ResponseWriter, r *http.Request) {
 			for k := range rooms {
 				data.Rooms = append(data.Rooms, k)
 			}
-			// data.RoomID = roomid
 			data.Message = "ルーム " + roomid + " は既にあります"
 
 			err = t.Execute(w, data)
@@ -98,7 +97,6 @@ func index(w http.ResponseWriter, r *http.Request) {
 		for k := range rooms {
 			data.Rooms = append(data.Rooms, k)
 		}
-		// data.RoomID = roomid
 		data.Message = "ルーム " + roomid + " が作成されました。"
 
 		err = t.Execute(w, data)
@@ -117,7 +115,7 @@ func room(w http.ResponseWriter, r *http.Request) {
 		roomid := r.URL.Query().Get("roomid")
 
 		_, exists := rooms[roomid]
-		if !exists {
+		if !exists { // 指定した部屋が存在していなかったら
 			log.Printf("This room was not found")
 
 			t, err := template.ParseFiles("index.html")
@@ -153,7 +151,6 @@ func room(w http.ResponseWriter, r *http.Request) {
 }
 
 func createRoom(roomid string) {
-	// roomID := fmt.Sprintf("%d", len(rooms)+1)
 	room := &ChatRoom{
 		ID:      roomid,
 		Clients: make(map[*websocket.Conn]bool),
