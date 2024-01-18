@@ -4,11 +4,15 @@
     <meta charset="UTF-8" />
     <title>sample</title>
     <script>
+        const wsprotocol = "ws://"
+        const domain = "localhost"
+        const port = ":8000"
+
         let roomid = ""
         let Name = ""
         // サーバーに接続
         window.onload = function () {
-            socket = new WebSocket("ws://localhost:8000/ws");
+            socket = new WebSocket(wsprotocol + domain + port + "/ws");
             socket.onopen = function () {
                 joinRoom();
             };

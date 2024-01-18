@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <title>sample</title>
     <script>
+        const protocol = "http://"
+        const domain = "localhost"
+        const port = ":8000"
         // サーバーページに遷移
         function enterRoom() {
             let sendroomid = document.getElementById("enter_roomid");
@@ -11,7 +14,7 @@
             if (rid == "") {
                 return;
             }
-            window.location.href = 'http://localhost:8000/room?roomid=' + rid;
+            window.location.href = protocol + domain + port + '/room?roomid=' + rid;
 
             sendroomid.value = "";
         }
