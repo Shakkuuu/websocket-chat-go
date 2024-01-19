@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+// Room作成
 func CreateRoom(roomid string, rooms map[string]*entity.ChatRoom) {
 	room := &entity.ChatRoom{
 		ID:      roomid,

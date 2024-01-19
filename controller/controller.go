@@ -12,10 +12,11 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-var rooms = make(map[string]*entity.ChatRoom)
+var rooms = make(map[string]*entity.ChatRoom) // 作成された各ルームを格納
 
-var broadcast = make(chan entity.Message)
+var broadcast = make(chan entity.Message) // 各クライアントにブロードキャストするためのメッセージのチャネル
 
+// indexページの表示
 func Index(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -26,6 +27,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Room一覧をテンプレートに渡す
 		var data entity.Data
 		for k := range rooms {
 			data.Rooms = append(data.Rooms, k)
@@ -38,6 +40,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case http.MethodPost:
+		// POSTされた作成するRoomidをFormから受け取り
 		r.ParseForm()
 		roomid := r.FormValue("create_roomid")
 
@@ -51,6 +54,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			// Room一覧とメッセージをテンプレートに渡す
 			var data entity.Data
 			for k := range rooms {
 				data.Rooms = append(data.Rooms, k)
@@ -66,6 +70,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Room作成
 		model.CreateRoom(roomid, rooms)
 
 		t, err := template.ParseFiles("view/index.html")
@@ -75,6 +80,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Room一覧とメッセージをテンプレートに渡す
 		var data entity.Data
 		for k := range rooms {
 			data.Rooms = append(data.Rooms, k)
@@ -94,9 +100,11 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Room内のページ
 func Room(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
+		// POSTされたRoomIDをFormから取得
 		r.ParseForm()
 		roomid := r.URL.Query().Get("roomid")
 
@@ -111,6 +119,7 @@ func Room(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			// Roomの一覧とメッセージをテンプレートに渡す
 			var data entity.Data
 			for k := range rooms {
 				data.Rooms = append(data.Rooms, k)
@@ -146,9 +155,11 @@ func Room(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// WebsocketでRoom参加後のコネクション確立
 func HandleConnection(ws *websocket.Conn) {
 	defer ws.Close()
 
+	// クライアントから参加する部屋が指定されたメッセージ受信
 	var msg entity.Message
 	err := websocket.JSON.Receive(ws, &msg)
 	if err != nil {
@@ -156,29 +167,36 @@ func HandleConnection(ws *websocket.Conn) {
 		return
 	}
 
+	// 部屋が生きているかどうか(なくてもいいかも)
 	room, exists := rooms[msg.RoomID]
 	if !exists {
 		log.Printf("This room was not found")
 		return
 	}
 
+	// Roomに参加
+	room.Clients[ws] = true
+	fmt.Println(room.Clients) // 参加者一覧 デバッグ用
+
+	// Roomに参加したことをそのRoomのクライアントにブロードキャスト
 	entermsg := entity.Message{RoomID: room.ID, Message: msg.Name + "が入室しました", Name: "Server"}
 	broadcast <- entermsg
 
+	// サーバ側からクライアントにWellcomeメッセージを送信
 	err = websocket.JSON.Send(ws, entity.Message{RoomID: room.ID, Message: "サーバ" + room.ID + "へようこそ", Name: "Server"})
 	if err != nil {
 		log.Printf("server wellcome Send error:%v\n", err)
 	}
 
-	room.Clients[ws] = true
-	fmt.Println(room.Clients)
-
+	// クライアントからメッセージが来るまで受信待ちする
 	for {
+		// クライアントからのメッセージを受信
 		err = websocket.JSON.Receive(ws, &msg)
 		if err != nil {
-			if err.Error() == "EOF" {
+			if err.Error() == "EOF" { // Roomを退出したことを示すメッセージが来たら
 				log.Printf("EOF error:%v\n", err)
-				delete(room.Clients, ws)
+				delete(room.Clients, ws) // Roomからそのクライアントを削除
+				// そのクライアントがRoomから退出したことをそのRoomにブロードキャスト
 				exitmsg := entity.Message{RoomID: msg.RoomID, Message: msg.Name + "が退出しました", Name: "Server"}
 				broadcast <- exitmsg
 				break
@@ -186,10 +204,12 @@ func HandleConnection(ws *websocket.Conn) {
 			log.Printf("Receive error:%v\n", err)
 		}
 
+		// goroutineでチャネルを待っているとこへメッセージを渡す
 		broadcast <- msg
 	}
 }
 
+// goroutineでメッセージのチャネルが来るまで待ち、Roomにブロードキャストする
 func HandleMessages() {
 	for {
 		// broadcastチャネルからメッセージを受け取る
