@@ -12,7 +12,7 @@ import (
 func CreateRoom(roomid string, rooms map[string]*entity.ChatRoom) {
 	room := &entity.ChatRoom{
 		ID:      roomid,
-		Clients: make(map[*websocket.Conn]bool),
+		Clients: make(map[*websocket.Conn]string),
 	}
 	fmt.Printf("room %v が作成されました\n", room.ID)
 	rooms[roomid] = room

@@ -167,7 +167,7 @@ func HandleConnection(ws *websocket.Conn) {
 		return
 	}
 
-	// 部屋が生きているかどうか(なくてもいいかも)
+	// 部屋が存在しているかどうか(なくてもいいかも)
 	room, exists := rooms[msg.RoomID]
 	if !exists {
 		log.Printf("This room was not found")
@@ -175,7 +175,7 @@ func HandleConnection(ws *websocket.Conn) {
 	}
 
 	// Roomに参加
-	room.Clients[ws] = true
+	room.Clients[ws] = msg.Name
 	fmt.Println(room.Clients) // 参加者一覧 デバッグ用
 
 	// Roomに参加したことをそのRoomのクライアントにブロードキャスト
@@ -214,6 +214,7 @@ func HandleMessages() {
 	for {
 		// broadcastチャネルからメッセージを受け取る
 		msg := <-broadcast
+		// 部屋が存在しているかどうか
 		room, exists := rooms[msg.RoomID]
 		if !exists {
 			continue

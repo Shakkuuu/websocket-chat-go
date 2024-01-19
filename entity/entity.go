@@ -5,7 +5,7 @@ import "golang.org/x/net/websocket"
 // クライアントが参加するチャットルーム
 type ChatRoom struct {
 	ID      string
-	Clients map[*websocket.Conn]bool
+	Clients map[*websocket.Conn]string
 }
 
 // HTMLテンプレートに渡すためのデータ
