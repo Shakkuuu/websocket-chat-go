@@ -5,6 +5,7 @@
     <title>sample</title>
     <script>
         const wsprotocol = "ws://"
+        const protocol = "http://"
         const domain = "localhost"
         const port = ":8000"
 
@@ -64,9 +65,35 @@
             if (msg == "") {
                 return;
             }
-            const message = { roomID: roomid, message: msg, name : Name};
+            let sendToName = document.getElementById("toname");
+            let stn = sendToName.value;
+            if (stn != "") {
+                const message = { roomID: roomid, message: msg, name : Name, toname : stn};
+                socket.send(JSON.stringify(message));
+                sendMessage.value = "";
+                return;
+            }
+            const message = { roomID: roomid, message: msg, name : Name, toname : ""};
             socket.send(JSON.stringify(message));
             sendMessage.value = "";
+        }
+
+        // Room内のユーザーの一覧を取得
+        function getUsers() {
+            document.getElementById('users').textContent = '';
+            fetch(protocol+domain+port+"/users?roomid="+roomid)
+                .then(response => response.json())
+                .then(data => {
+                    const users = data.userslist;
+
+                    const userListElement = document.getElementById("users");
+                    users.forEach(user => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = user;
+                        userListElement.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Error fetching user data:', error));
         }
     </script>
 </head>
@@ -79,6 +106,12 @@
 
 <h2>ユーザー名</h2>
 <p id="username"></p>
+
+<h2>参加ユーザー一覧</h2>
+<ul id="users"></ul>
+<p><button onclick="getUsers()">更新</button></p>
+
+<input type="text" id="toname">
 
 <!-- 送信欄 -->
 <p>メッセージを入力してください。</p>

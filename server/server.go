@@ -13,6 +13,8 @@ import (
 func Init(port string) {
 	http.HandleFunc("/", controller.Index)                             // indexページ
 	http.HandleFunc("/room", controller.Room)                          // Room内のページ
+	http.HandleFunc("/rooms", controller.RoomsList)                    // Room一覧取得
+	http.HandleFunc("/users", controller.RoomUsersList)                // User一覧取得
 	http.Handle("/ws", websocket.Handler(controller.HandleConnection)) // メッセージWebsocket用
 	go controller.HandleMessages()                                     // goroutineとチャネルで常にメッセージを待つ
 

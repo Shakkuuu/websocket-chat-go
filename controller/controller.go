@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -14,7 +15,7 @@ import (
 
 var rooms = make(map[string]*entity.ChatRoom) // 作成された各ルームを格納
 
-var broadcast = make(chan entity.Message) // 各クライアントにブロードキャストするためのメッセージのチャネル
+var sentmessage = make(chan entity.Message) // 各クライアントに送信するためのメッセージのチャネル
 
 // indexページの表示
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -104,11 +105,11 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func Room(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		// POSTされたRoomIDをFormから取得
+		// クエリ読み取り
 		r.ParseForm()
 		roomid := r.URL.Query().Get("roomid")
 
-		_, exists := rooms[roomid]
+		room, exists := rooms[roomid]
 		if !exists { // 指定した部屋が存在していなかったら
 			log.Printf("This room was not found")
 
@@ -142,7 +143,13 @@ func Room(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = t.Execute(w, nil)
+		// 参加しているユーザー一覧をテンプレートに渡す
+		var data entity.Data
+		for _, username := range room.Clients {
+			data.Users = append(data.Users, username)
+		}
+
+		err = t.Execute(w, data)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -180,7 +187,7 @@ func HandleConnection(ws *websocket.Conn) {
 
 	// Roomに参加したことをそのRoomのクライアントにブロードキャスト
 	entermsg := entity.Message{RoomID: room.ID, Message: msg.Name + "が入室しました", Name: "Server"}
-	broadcast <- entermsg
+	sentmessage <- entermsg
 
 	// サーバ側からクライアントにWellcomeメッセージを送信
 	err = websocket.JSON.Send(ws, entity.Message{RoomID: room.ID, Message: "サーバ" + room.ID + "へようこそ", Name: "Server"})
@@ -198,34 +205,120 @@ func HandleConnection(ws *websocket.Conn) {
 				delete(room.Clients, ws) // Roomからそのクライアントを削除
 				// そのクライアントがRoomから退出したことをそのRoomにブロードキャスト
 				exitmsg := entity.Message{RoomID: msg.RoomID, Message: msg.Name + "が退出しました", Name: "Server"}
-				broadcast <- exitmsg
+				sentmessage <- exitmsg
 				break
 			}
 			log.Printf("Receive error:%v\n", err)
 		}
 
 		// goroutineでチャネルを待っているとこへメッセージを渡す
-		broadcast <- msg
+		sentmessage <- msg
 	}
 }
 
-// goroutineでメッセージのチャネルが来るまで待ち、Roomにブロードキャストする
+// goroutineでメッセージのチャネルが来るまで待ち、Roomにメッセージを送信する
 func HandleMessages() {
 	for {
-		// broadcastチャネルからメッセージを受け取る
-		msg := <-broadcast
+		// sentmessageチャネルからメッセージを受け取る
+		msg := <-sentmessage
 		// 部屋が存在しているかどうか
 		room, exists := rooms[msg.RoomID]
 		if !exists {
 			continue
 		}
-		// 接続中のクライアントにメッセージを送る
-		for client := range room.Clients {
-			// メッセージを返信する
-			err := websocket.JSON.Send(client, entity.Message{RoomID: room.ID, Message: msg.Message, Name: msg.Name})
-			if err != nil {
-				log.Printf("Send error:%v\n", err)
+
+		if msg.ToName != "" {
+			// 接続中のクライアントにメッセージを送る
+			for client, name := range room.Clients {
+				if msg.ToName == name || msg.Name == name {
+					// メッセージを返信する
+					err := websocket.JSON.Send(client, entity.Message{RoomID: room.ID, Message: msg.Message, Name: msg.Name})
+					if err != nil {
+						log.Printf("Send error:%v\n", err)
+					}
+				}
+			}
+		} else {
+			// 接続中のクライアントにメッセージを送る
+			for client := range room.Clients {
+				// メッセージを返信する
+				err := websocket.JSON.Send(client, entity.Message{RoomID: room.ID, Message: msg.Message, Name: msg.Name})
+				if err != nil {
+					log.Printf("Send error:%v\n", err)
+				}
 			}
 		}
+	}
+}
+
+// 参加ユーザーの一覧を返す
+func RoomUsersList(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		// クエリ読み取り
+		r.ParseForm()
+		roomid := r.URL.Query().Get("roomid")
+
+		var roomuserslist entity.SentRoomUsersList
+
+		// roomがあるか確認
+		room, exists := rooms[roomid]
+		if !exists {
+			fmt.Println("Roomが見つかりませんでした")
+			http.Error(w, "Roomが見つかりませんでした", http.StatusNotFound)
+			return
+		}
+
+		// Room内のユーザーを格納
+		for _, user := range room.Clients {
+			roomuserslist.UsersList = append(roomuserslist.UsersList, user)
+		}
+
+		// jsonに変換
+		sentjson, err := json.Marshal(roomuserslist)
+		if err != nil {
+			fmt.Printf("json.Marshal error: %v", err)
+			http.Error(w, "json.Marshal error", http.StatusInternalServerError)
+			return
+		}
+
+		// jsonで送信
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(sentjson)
+
+	default:
+		fmt.Fprintln(w, "Method not allowed")
+		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+// Roomの一覧を返す
+func RoomsList(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		var roomslist entity.SentRoomsList
+
+		// Roomを格納
+		for room := range rooms {
+			roomslist.RoomsList = append(roomslist.RoomsList, room)
+		}
+
+		// jsonに変換
+		sentjson, err := json.Marshal(roomslist)
+		if err != nil {
+			fmt.Printf("json.Marshal error: %v", err)
+			http.Error(w, "json.Marshal error", http.StatusInternalServerError)
+			return
+		}
+
+		// jsonで送信
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(sentjson)
+
+	default:
+		fmt.Fprintln(w, "Method not allowed")
+		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
+		return
 	}
 }
