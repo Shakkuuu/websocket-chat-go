@@ -20,7 +20,7 @@
             socket.onmessage = function (event) {
                 // サーバーからメッセージを受け取る
                 const msg = JSON.parse(event.data);
-                updateMessage(msg.roomID, msg.message, msg.name);
+                updateMessage(msg.roomID, msg.message, msg.name, msg.toname);
             };
         };
 
@@ -39,9 +39,9 @@
         }
 
         // メッセージ欄を更新する
-        function updateMessage(roomID, message, name) {
+        function updateMessage(roomID, message, name, toname) {
             let listName = document.createElement("li");
-            let nameText = document.createTextNode(roomID + " : " + name);
+            let nameText = document.createTextNode(roomID + " : " + name + "→" + toname);
             listName.appendChild(nameText);
 
             let messages = document.createElement("ul");

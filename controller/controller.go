@@ -232,7 +232,7 @@ func HandleMessages() {
 			for client, name := range room.Clients {
 				if msg.ToName == name || msg.Name == name {
 					// メッセージを返信する
-					err := websocket.JSON.Send(client, entity.Message{RoomID: room.ID, Message: msg.Message, Name: msg.Name})
+					err := websocket.JSON.Send(client, entity.Message{RoomID: room.ID, Message: msg.Message, Name: msg.Name, ToName: msg.ToName})
 					if err != nil {
 						log.Printf("Send error:%v\n", err)
 					}
