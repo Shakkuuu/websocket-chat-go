@@ -4,16 +4,16 @@
     <meta charset="UTF-8" />
     <title>sample</title>
     <script>
-        const wsprotocol = "ws://"
-        const protocol = "http://"
-        const domain = "localhost"
-        const port = ":8000"
+        const wsprotocol = "ws:"
+        const protocol = location.protocol
+        const domain = location.hostname
+        const port = location.port
 
         let roomid = ""
         let Name = ""
         // サーバーに接続
         window.onload = function () {
-            socket = new WebSocket(wsprotocol + domain + port + "/ws");
+            socket = new WebSocket(wsprotocol + "//" + domain + ":" + port + "/ws");
             socket.onopen = function () {
                 joinRoom();
             };
@@ -81,7 +81,7 @@
         // Room内のユーザーの一覧を取得
         function getUsers() {
             document.getElementById('users').textContent = '';
-            fetch(protocol+domain+port+"/users?roomid="+roomid)
+            fetch(protocol+"//"+domain+":"+port+"/users?roomid="+roomid)
                 .then(response => response.json())
                 .then(data => {
                     const users = data.userslist;
