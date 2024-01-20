@@ -11,6 +11,7 @@
 
         let roomid = ""
         let Name = ""
+        // let userarr = []
         // サーバーに接続
         window.onload = function () {
             socket = new WebSocket(wsprotocol + "//" + domain + ":" + port + "/ws");
@@ -28,6 +29,9 @@
             const NameInput = prompt("Enter your Name:");
             if (NameInput) {
                 Name = NameInput
+                document.getElementById("username").textContent = Name
+            } else {
+                Name = "匿名"
                 document.getElementById("username").textContent = Name
             }
             let url_string = location.href;
@@ -88,6 +92,7 @@
 
                     const userListElement = document.getElementById("users");
                     users.forEach(user => {
+                        // userarr.push(user);
                         const listItem = document.createElement('li');
                         listItem.textContent = user;
                         userListElement.appendChild(listItem);
@@ -111,6 +116,7 @@
 <ul id="users"></ul>
 <p><button onclick="getUsers()">更新</button></p>
 
+<h2>プライベートチャット送信先ユーザー名</h2>
 <input type="text" id="toname">
 
 <!-- 送信欄 -->
