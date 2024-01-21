@@ -261,6 +261,8 @@ func RoomUsersList(w http.ResponseWriter, r *http.Request) {
 
 		var roomuserslist entity.SentRoomUsersList
 
+		roomuserslist.UsersList = append(roomuserslist.UsersList, "匿名")
+
 		// roomがあるか確認
 		room, exists := rooms[roomid]
 		if !exists {

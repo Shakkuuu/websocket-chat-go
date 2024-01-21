@@ -4,14 +4,14 @@
     <meta charset="UTF-8" />
     <title>sample</title>
     <script>
-        const wsprotocol = "ws:"
-        const protocol = location.protocol
-        const domain = location.hostname
-        const port = location.port
+        const wsprotocol = "ws:";
+        const protocol = location.protocol;
+        const domain = location.hostname;
+        const port = location.port;
 
-        let roomid = ""
-        let Name = ""
-        // let userarr = []
+        let roomid = "";
+        let Name = "";
+
         // サーバーに接続
         window.onload = function () {
             socket = new WebSocket(wsprotocol + "//" + domain + ":" + port + "/ws");
@@ -26,20 +26,47 @@
         };
 
         function joinRoom() {
-            const NameInput = prompt("Enter your Name:");
-            if (NameInput) {
-                Name = NameInput
-                document.getElementById("username").textContent = Name
-            } else {
-                Name = "匿名"
-                document.getElementById("username").textContent = Name
-            }
             let url_string = location.href;
             let url = new URL(url_string);
             roomid = url.searchParams.get("roomid");
-            const message = { roomID: roomid, name: Name};
             document.getElementById("current_server").textContent = roomid
-            socket.send(JSON.stringify(message));
+
+            fetch(protocol+"//"+domain+":"+port+"/users?roomid="+roomid)
+                .then(response => response.json())
+                .then(data => {
+                    const users = data.userslist;
+
+                    console.log(users);
+
+                    while (true) {
+                        const NameInput = prompt("Enter your Name:");
+                        if (NameInput) {
+                            Name = NameInput
+                            document.getElementById("username").textContent = Name
+
+                            const include = users.includes(Name);
+                            console.log(include);
+                            if (include) {
+                                alert("そのユーザー名は既に使用されています。");
+                                Name = "";
+                                continue;
+                            };
+                            break;
+                        } else {
+                            Name = "匿名"
+                            document.getElementById("username").textContent = Name
+                            break;
+                        };
+                    };
+
+                    const message = { roomID: roomid, name: Name};
+                    socket.send(JSON.stringify(message));
+                })
+                .catch(error => {
+                    console.error('Error fetching user data:', error);
+                    const message = { roomID: roomid, name: Name};
+                    socket.send(JSON.stringify(message));
+                });
         }
 
         // メッセージ欄を更新する
@@ -92,7 +119,6 @@
 
                     const userListElement = document.getElementById("users");
                     users.forEach(user => {
-                        // userarr.push(user);
                         const listItem = document.createElement('li');
                         listItem.textContent = user;
                         userListElement.appendChild(listItem);
@@ -123,11 +149,11 @@
 <p>メッセージを入力してください。</p>
 <input type="text" id="message"><button onclick="send()">送信</button>
 
+<p><a href="/">戻る</a></p>
+
 <!-- メッセージ欄 -->
 <h2>メッセージ一覧</h2>
 <ul id="messages"></ul>
-
-<p><a href="/">戻る</a></p>
 
 </body>
 </html>
