@@ -24,7 +24,7 @@ func Init(port string, view embed.FS) {
 	// サーバ起動
 	err := http.ListenAndServe(port, nil)
 	if err != nil {
-		log.Printf("ListenAndServe error:%v\n", err)
+		log.Printf("server:27, ListenAndServe error:%v\n", err)
 		os.Exit(1)
 	}
 }

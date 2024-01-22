@@ -23,7 +23,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		t, err := template.ParseFiles("view/index.html")
 		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
+			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 			return
 		}
@@ -36,7 +36,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 		err = t.Execute(w, data)
 		if err != nil {
-			log.Printf("Excute error:%v\n", err)
+			log.Printf("controller:39, Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 			return
 		}
@@ -50,7 +50,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 			// 作成失敗メッセージ表示
 			t, err := template.ParseFiles("view/index.html")
 			if err != nil {
-				log.Printf("template.ParseFiles error:%v\n", err)
+				log.Printf("controller:53, template.ParseFiles error:%v\n", err)
 				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 				return
 			}
@@ -64,7 +64,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 			err = t.Execute(w, data)
 			if err != nil {
-				log.Printf("Excute error:%v\n", err)
+				log.Printf("controller:67, Excute error:%v\n", err)
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 				return
 			}
@@ -76,7 +76,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 		t, err := template.ParseFiles("view/index.html")
 		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
+			log.Printf("controller:79, template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 			return
 		}
@@ -90,12 +90,12 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 		err = t.Execute(w, data)
 		if err != nil {
-			log.Printf("Excute error:%v\n", err)
+			log.Printf("controller:93, Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 			return
 		}
 	default:
-		fmt.Fprintln(w, "Method not allowed")
+		fmt.Fprintln(w, "controller:98, Method not allowed")
 		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
 		return
 	}
@@ -111,11 +111,11 @@ func Room(w http.ResponseWriter, r *http.Request) {
 
 		room, exists := rooms[roomid]
 		if !exists { // 指定した部屋が存在していなかったら
-			log.Printf("This room was not found")
+			log.Printf("controller:114, This room was not found")
 
 			t, err := template.ParseFiles("view/index.html")
 			if err != nil {
-				log.Printf("template.ParseFiles error:%v\n", err)
+				log.Printf("controller:118, template.ParseFiles error:%v\n", err)
 				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 				return
 			}
@@ -129,7 +129,7 @@ func Room(w http.ResponseWriter, r *http.Request) {
 
 			err = t.Execute(w, data)
 			if err != nil {
-				log.Printf("Excute error:%v\n", err)
+				log.Printf("controller:132, Excute error:%v\n", err)
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 				return
 			}
@@ -138,7 +138,7 @@ func Room(w http.ResponseWriter, r *http.Request) {
 
 		t, err := template.ParseFiles("view/room.html")
 		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
+			log.Printf("controller:141, template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 			return
 		}
@@ -151,12 +151,12 @@ func Room(w http.ResponseWriter, r *http.Request) {
 
 		err = t.Execute(w, data)
 		if err != nil {
-			log.Printf("Excute error:%v\n", err)
+			log.Printf("controller:154, Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 			return
 		}
 	default:
-		fmt.Fprintln(w, "Method not allowed")
+		fmt.Fprintln(w, "controller:159, Method not allowed")
 		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
 		return
 	}
@@ -170,14 +170,14 @@ func HandleConnection(ws *websocket.Conn) {
 	var msg entity.Message
 	err := websocket.JSON.Receive(ws, &msg)
 	if err != nil {
-		log.Printf("Receive room ID error:%v\n", err)
+		log.Printf("controller:173, Receive room ID error:%v\n", err)
 		return
 	}
 
 	// 部屋が存在しているかどうか(なくてもいいかも)
 	room, exists := rooms[msg.RoomID]
 	if !exists {
-		log.Printf("This room was not found")
+		log.Printf("controller:180, This room was not found")
 		return
 	}
 
@@ -192,7 +192,7 @@ func HandleConnection(ws *websocket.Conn) {
 	// サーバ側からクライアントにWellcomeメッセージを送信
 	err = websocket.JSON.Send(ws, entity.Message{RoomID: room.ID, Message: "サーバ" + room.ID + "へようこそ", Name: "Server"})
 	if err != nil {
-		log.Printf("server wellcome Send error:%v\n", err)
+		log.Printf("controller:195, server wellcome Send error:%v\n", err)
 	}
 
 	// クライアントからメッセージが来るまで受信待ちする
@@ -201,14 +201,14 @@ func HandleConnection(ws *websocket.Conn) {
 		err = websocket.JSON.Receive(ws, &msg)
 		if err != nil {
 			if err.Error() == "EOF" { // Roomを退出したことを示すメッセージが来たら
-				log.Printf("EOF error:%v\n", err)
+				log.Printf("controller:204, EOF error:%v\n", err)
 				delete(room.Clients, ws) // Roomからそのクライアントを削除
 				// そのクライアントがRoomから退出したことをそのRoomにブロードキャスト
 				exitmsg := entity.Message{RoomID: msg.RoomID, Message: msg.Name + "が退出しました", Name: "Server"}
 				sentmessage <- exitmsg
 				break
 			}
-			log.Printf("Receive error:%v\n", err)
+			log.Printf("controller:211, Receive error:%v\n", err)
 		}
 
 		// goroutineでチャネルを待っているとこへメッセージを渡す
@@ -234,7 +234,7 @@ func HandleMessages() {
 					// メッセージを返信する
 					err := websocket.JSON.Send(client, entity.Message{RoomID: room.ID, Message: msg.Message, Name: msg.Name, ToName: msg.ToName})
 					if err != nil {
-						log.Printf("Send error:%v\n", err)
+						log.Printf("controller:237, Send error:%v\n", err)
 					}
 				}
 			}
@@ -244,7 +244,7 @@ func HandleMessages() {
 				// メッセージを返信する
 				err := websocket.JSON.Send(client, entity.Message{RoomID: room.ID, Message: msg.Message, Name: msg.Name})
 				if err != nil {
-					log.Printf("Send error:%v\n", err)
+					log.Printf("controller:247, Send error:%v\n", err)
 				}
 			}
 		}
@@ -266,7 +266,7 @@ func RoomUsersList(w http.ResponseWriter, r *http.Request) {
 		// roomがあるか確認
 		room, exists := rooms[roomid]
 		if !exists {
-			fmt.Println("Roomが見つかりませんでした")
+			log.Println("controller:269, Roomが見つかりませんでした")
 			http.Error(w, "Roomが見つかりませんでした", http.StatusNotFound)
 			return
 		}
@@ -279,7 +279,7 @@ func RoomUsersList(w http.ResponseWriter, r *http.Request) {
 		// jsonに変換
 		sentjson, err := json.Marshal(roomuserslist)
 		if err != nil {
-			fmt.Printf("json.Marshal error: %v", err)
+			log.Printf("controller:282, json.Marshal error: %v", err)
 			http.Error(w, "json.Marshal error", http.StatusInternalServerError)
 			return
 		}
@@ -289,7 +289,7 @@ func RoomUsersList(w http.ResponseWriter, r *http.Request) {
 		w.Write(sentjson)
 
 	default:
-		fmt.Fprintln(w, "Method not allowed")
+		fmt.Fprintln(w, "controller:292, Method not allowed")
 		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
 		return
 	}
@@ -309,7 +309,7 @@ func RoomsList(w http.ResponseWriter, r *http.Request) {
 		// jsonに変換
 		sentjson, err := json.Marshal(roomslist)
 		if err != nil {
-			fmt.Printf("json.Marshal error: %v", err)
+			log.Printf("controller:312, json.Marshal error: %v", err)
 			http.Error(w, "json.Marshal error", http.StatusInternalServerError)
 			return
 		}
@@ -319,7 +319,7 @@ func RoomsList(w http.ResponseWriter, r *http.Request) {
 		w.Write(sentjson)
 
 	default:
-		fmt.Fprintln(w, "Method not allowed")
+		fmt.Fprintln(w, "controller:322, Method not allowed")
 		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
 		return
 	}

@@ -1,8 +1,7 @@
 package model
 
 import (
-	"fmt"
-
+	"log"
 	"websocket-chat/entity"
 
 	"golang.org/x/net/websocket"
@@ -14,6 +13,6 @@ func CreateRoom(roomid string, rooms map[string]*entity.ChatRoom) {
 		ID:      roomid,
 		Clients: make(map[*websocket.Conn]string),
 	}
-	fmt.Printf("room %v が作成されました\n", room.ID)
+	log.Printf("room %v が作成されました\n", room.ID)
 	rooms[roomid] = room
 }
