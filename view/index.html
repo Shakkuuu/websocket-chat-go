@@ -18,12 +18,12 @@
 
 <p>作成するチャットルームのIDを入力してください。(1 ~ 999)</p>
 <form method="POST" action="/" required="required">
-    <input type="number" min="1" max="999" name="create_roomid">
+    <input type="number" min="1" max="999" name="create_roomid" placeholder="作成する部屋番号">
     <input type="submit" value="作成">
 </form>
 
 <p>参加するチャットルームのIDを入力してください。(1 ~ 999)</p>
-<input type="number" min="1" max="999" id="enter_roomid">
+<input type="number" min="1" max="999" id="enter_roomid" placeholder="参加する部屋番号">
 <button onclick="enterRoom()">参加</button>
 
 </body>

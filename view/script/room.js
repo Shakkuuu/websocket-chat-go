@@ -120,3 +120,17 @@ function getUsers() {
         })
         .catch(error => console.error('Error fetching user data:', error));
 }
+
+let typingTimer;
+const typingTimeout = 1000; // 1秒間のタイピングを入力中とみなす時間
+
+function showTypingStatus() {
+    // タイピング中のステータス表示を制御
+    clearTimeout(typingTimer);
+    document.getElementById("inputStatus").style.display = "block";
+
+    // 一定時間経過後に「入力中」のステータスを非表示にする
+    typingTimer = setTimeout(() => {
+        document.getElementById("inputStatus").style.display = "none";
+    }, typingTimeout);
+}

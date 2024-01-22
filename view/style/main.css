@@ -25,3 +25,7 @@ textarea {
 ul {
     white-space: pre-wrap;
 }
+#inputStatus {
+    display: none;
+    color: #888;
+}

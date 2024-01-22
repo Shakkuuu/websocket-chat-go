@@ -25,11 +25,11 @@
         <p><button onclick="getUsers()">更新</button></p>
 
         <h2>プライベートチャット送信先ユーザー名</h2>
-        <input type="text" id="toname">
+        <input type="text" id="toname" placeholder="送信先ユーザー名">
 
         <!-- 送信欄 -->
-        <p>メッセージを入力してください。</p>
-        <textarea id="message" maxlength="10000"></textarea>
+        <div id="inputStatus">入力中...</div>
+        <textarea id="message" maxlength="10000" placeholder="メッセージを入力してください" oninput="showTypingStatus()"></textarea>
         <button onclick="send()">送信</button>
 
         <p><a href="/">戻る</a></p>
