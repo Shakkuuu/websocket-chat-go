@@ -1,6 +1,9 @@
-/** パソコン(デフォルト) **/
 body {
     background-color: azure;
+}
+textarea {
+    width: 400px;
+    height: 200px;
 }
 .scroll{
     height: 90vh;
@@ -22,32 +25,3 @@ body {
 ul {
     white-space: pre-wrap;
 }
-
-/** タブレット **/
-/* @media screen and (max-width: 1024px) {
-    p {color : green}
-} */
-
-/** スマホ縦 **/
-@media screen and (max-width: 480px) {
-    .scroll{
-        height: 90vh;
-        width: 50vh;
-        overflow: auto;
-    }
-    .chatback{
-        height: 90vh;
-        width: 50vh;
-        background-color: gainsboro;
-    }
-    .container{
-        display: flex;
-    }
-    .left, .right {
-        flex: 1;
-    }
-    ul {
-        white-space: pre-wrap;
-    }
-}
-
