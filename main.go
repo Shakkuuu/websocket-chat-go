@@ -1,12 +1,18 @@
 package main
 
 import (
+	"embed"
 	"log"
 	"os"
 	"websocket-chat/server"
 
 	"github.com/joho/godotenv"
 )
+
+// view以下の静的ファイルを変数に格納
+//
+//go:embed view/*
+var view embed.FS
 
 func main() {
 	// 環境変数読み込み
@@ -16,5 +22,5 @@ func main() {
 		os.Exit(1)
 	}
 	port := os.Getenv("SERVERPORT") // ポート番号
-	server.Init(port)               // サーバ起動
+	server.Init(port, view)         // サーバ起動
 }

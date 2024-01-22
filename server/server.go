@@ -1,6 +1,7 @@
 package server
 
 import (
+	"embed"
 	"log"
 	"net/http"
 	"os"
@@ -10,7 +11,9 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-func Init(port string) {
+func Init(port string, view embed.FS) {
+	http.Handle("/view/", http.FileServer(http.FS(view)))
+
 	http.HandleFunc("/", controller.Index)                             // indexページ
 	http.HandleFunc("/room", controller.Room)                          // Room内のページ
 	http.HandleFunc("/rooms", controller.RoomsList)                    // Room一覧取得
