@@ -36,16 +36,22 @@ function joinRoom() {
                 const NameInput = prompt("Enter your Name:");
                 if (NameInput) {
                     Name = NameInput
-                    document.getElementById("username").textContent = Name
-
-                    const include = users.includes(Name);
-                    console.log(include);
-                    if (include) {
-                        alert("そのユーザー名は既に使用されています。");
+                    if (Name.length > 20) {
+                        alert("ユーザー名は20文字以内にしてください");
                         Name = "";
                         continue;
-                    };
-                    break;
+                    } else {
+                        document.getElementById("username").textContent = Name
+
+                        const include = users.includes(Name);
+                        console.log(include);
+                        if (include) {
+                            alert("そのユーザー名は既に使用されています。");
+                            Name = "";
+                            continue;
+                        };
+                        break;
+                    }
                 } else {
                     Name = "匿名"
                     document.getElementById("username").textContent = Name
