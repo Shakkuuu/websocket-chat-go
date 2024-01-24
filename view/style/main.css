@@ -5,6 +5,9 @@ textarea {
     width: 400px;
     height: 200px;
 }
+input[type="number"] {
+    width: 120px;
+}
 .scroll{
     height: 90vh;
     width: 50vh;
@@ -12,7 +15,7 @@ textarea {
 }
 .chatback{
     height: 90vh;
-    width: 50vh;
+    width: 60vh;
     background-color: lightcyan;
 }
 .container{

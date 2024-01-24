@@ -24,10 +24,11 @@
         <ul id="users"></ul>
         <p><button onclick="getUsers()">更新</button></p>
 
-        <h2>プライベートチャット送信先ユーザー名</h2>
+        <h3>プライベートチャット送信先ユーザー名</h3>
         <input type="text" id="toname" placeholder="送信先ユーザー名">
 
         <!-- 送信欄 -->
+        <h3>メッセージ</h3>
         <div id="inputStatus">入力中...</div>
         <textarea id="message" maxlength="10000" placeholder="メッセージを入力してください" oninput="showTypingStatus()"></textarea>
         <button onclick="send()">送信</button>
