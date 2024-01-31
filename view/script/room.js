@@ -8,15 +8,34 @@ let Name = "";
 
 // サーバーに接続
 window.onload = function () {
-    socket = new WebSocket(wsprotocol + "//" + domain + ":" + port + "/ws");
-    socket.onopen = function () {
-        joinRoom();
-    };
-    socket.onmessage = function (event) {
-        // サーバーからメッセージを受け取る
-        const msg = JSON.parse(event.data);
-        updateMessage(msg.roomID, msg.message, msg.name, msg.toname);
-    };
+    fetch(protocol+"//"+domain+":"+port+"/username")
+    .then(response => response.json())
+    .then(data => {
+        const username = data.name;
+
+        console.log(username);
+
+        Name = username;
+
+        if (Name == "") {
+            window.location.href = protocol + "//" + domain + ":" + port + '/login';
+            return
+        }
+        socket = new WebSocket(wsprotocol + "//" + domain + ":" + port + "/ws");
+        socket.onopen = function () {
+            joinRoom();
+        };
+        socket.onmessage = function (event) {
+            // サーバーからメッセージを受け取る
+            const msg = JSON.parse(event.data);
+            updateMessage(msg.roomID, msg.message, msg.name, msg.toname);
+        };
+    })
+    .catch(error => {
+        console.error('Error fetching user data:', error);
+        window.location.href = protocol + "//" + domain + ":" + port + '/login';
+        return
+    });
 };
 
 function joinRoom() {
@@ -25,48 +44,9 @@ function joinRoom() {
     roomid = url.searchParams.get("roomid");
     document.getElementById("current_server").textContent = roomid
 
-    fetch(protocol+"//"+domain+":"+port+"/users?roomid="+roomid)
-        .then(response => response.json())
-        .then(data => {
-            const users = data.userslist;
-
-            console.log(users);
-
-            while (true) {
-                const NameInput = prompt("Enter your Name:");
-                if (NameInput) {
-                    Name = NameInput
-                    if (Name.length > 20) {
-                        alert("ユーザー名は20文字以内にしてください");
-                        Name = "";
-                        continue;
-                    } else {
-                        document.getElementById("username").textContent = Name
-
-                        const include = users.includes(Name);
-                        console.log(include);
-                        if (include) {
-                            alert("そのユーザー名は既に使用されています。");
-                            Name = "";
-                            continue;
-                        };
-                        break;
-                    }
-                } else {
-                    Name = "匿名"
-                    document.getElementById("username").textContent = Name
-                    break;
-                };
-            };
-
-            const message = { roomID: roomid, name: Name};
-            socket.send(JSON.stringify(message));
-        })
-        .catch(error => {
-            console.error('Error fetching user data:', error);
-            const message = { roomID: roomid, name: Name};
-            socket.send(JSON.stringify(message));
-        });
+    document.getElementById("username").textContent = Name
+    const message = { roomID: roomid, name: Name};
+    socket.send(JSON.stringify(message));
 }
 
 // メッセージ欄を更新する

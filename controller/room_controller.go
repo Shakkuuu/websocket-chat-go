@@ -17,11 +17,11 @@ var rooms = make(map[string]*entity.ChatRoom) // 作成された各ルームを�
 
 var sentmessage = make(chan entity.Message) // 各クライアントに送信するためのメッセージのチャネル
 
-// indexページの表示
-func Index(w http.ResponseWriter, r *http.Request) {
+// roomtopページの表示
+func RoomTop(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		t, err := template.ParseFiles("view/index.html")
+		t, err := template.ParseFiles("view/roomtop.html")
 		if err != nil {
 			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
@@ -48,7 +48,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		_, exists := rooms[roomid]
 		if exists { // roomが既に存在していたら
 			// 作成失敗メッセージ表示
-			t, err := template.ParseFiles("view/index.html")
+			t, err := template.ParseFiles("view/roomtop.html")
 			if err != nil {
 				log.Printf("controller:53, template.ParseFiles error:%v\n", err)
 				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
@@ -74,7 +74,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		// Room作成
 		model.CreateRoom(roomid, rooms)
 
-		t, err := template.ParseFiles("view/index.html")
+		t, err := template.ParseFiles("view/roomtop.html")
 		if err != nil {
 			log.Printf("controller:79, template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
@@ -113,7 +113,7 @@ func Room(w http.ResponseWriter, r *http.Request) {
 		if !exists { // 指定した部屋が存在していなかったら
 			log.Printf("controller:114, This room was not found")
 
-			t, err := template.ParseFiles("view/index.html")
+			t, err := template.ParseFiles("view/roomtop.html")
 			if err != nil {
 				log.Printf("controller:118, template.ParseFiles error:%v\n", err)
 				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
@@ -248,50 +248,6 @@ func HandleMessages() {
 				}
 			}
 		}
-	}
-}
-
-// 参加ユーザーの一覧を返す
-func RoomUsersList(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		// クエリ読み取り
-		r.ParseForm()
-		roomid := r.URL.Query().Get("roomid")
-
-		var roomuserslist entity.SentRoomUsersList
-
-		roomuserslist.UsersList = append(roomuserslist.UsersList, "匿名")
-
-		// roomがあるか確認
-		room, exists := rooms[roomid]
-		if !exists {
-			log.Println("controller:269, Roomが見つかりませんでした")
-			http.Error(w, "Roomが見つかりませんでした", http.StatusNotFound)
-			return
-		}
-
-		// Room内のユーザーを格納
-		for _, user := range room.Clients {
-			roomuserslist.UsersList = append(roomuserslist.UsersList, user)
-		}
-
-		// jsonに変換
-		sentjson, err := json.Marshal(roomuserslist)
-		if err != nil {
-			log.Printf("controller:282, json.Marshal error: %v", err)
-			http.Error(w, "json.Marshal error", http.StatusInternalServerError)
-			return
-		}
-
-		// jsonで送信
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(sentjson)
-
-	default:
-		fmt.Fprintln(w, "controller:292, Method not allowed")
-		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
-		return
 	}
 }
 

@@ -33,3 +33,18 @@ type SentRoomUsersList struct {
 type SentRoomsList struct {
 	RoomsList []string `json:"roomslist"`
 }
+
+type SentUser struct {
+	Name string `json:"name"`
+}
+
+type User struct {
+	Name               string
+	Password           string
+	ParticipatingRooms []ParticipatingRoom
+}
+
+type ParticipatingRoom struct {
+	Room     ChatRoom
+	IsMaster bool
+}
