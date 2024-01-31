@@ -5,24 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/view/icon/favicon.ico" />
     <link rel="stylesheet" href="/view/style/main.css">
-    <title>login</title>
-    <!-- <script src="/view/script/room.js"></script> -->
+    <title>signup</title>
 </head>
 <body>
-    <h1>login</h1>
+    <h1>signup</h1>
     <p>{{.Message}}</p>
-    <p>user login</p>
-    <form action="/login" method="POST">
+    <p>user登録</p>
+    <form action="/signup" method="POST">
         <div>
             <input type="text" name="username" placeholder="username" autocomplete="off">
         </div>
         <div>
             <input type="password" name="password" placeholder="password" autocomplete="off">
         </div>
-        <p><input type="submit" value="login"></p>
+        <div>
+            <input type="password" name="checkpassword" placeholder="checkpassword" autocomplete="off">
+        </div>
+        <p><input type="submit" value="登録"></p>
     </form>
-    <p><a href="/signup">サインアップ</a></p>
-    <!-- <p><a href="/app">メインページ(ログインが必要です)</a></p> -->
+    <p><a href="/login">ログイン</a></p>
     <p><a href="/">戻る</a></p>
 </body>
 </html>

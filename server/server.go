@@ -27,6 +27,7 @@ func Init(port string, view embed.FS) {
 
 	http.Handle("/", loggingMiddleware(http.HandlerFunc(controller.RoomTop)))             // roomtopページ
 	http.Handle("/login", loggingMiddleware(http.HandlerFunc(controller.Login)))          // ログインページ
+	http.Handle("/signup", loggingMiddleware(http.HandlerFunc(controller.Signup)))        // サインアップページ
 	http.Handle("/room", loggingMiddleware(http.HandlerFunc(controller.Room)))            // Room内のページ
 	http.Handle("/rooms", loggingMiddleware(http.HandlerFunc(controller.RoomsList)))      // Room一覧取得
 	http.Handle("/users", loggingMiddleware(http.HandlerFunc(controller.RoomUsersList)))  // User一覧取得

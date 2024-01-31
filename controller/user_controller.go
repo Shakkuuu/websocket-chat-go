@@ -15,7 +15,113 @@ var store = sessions.NewCookieStore([]byte("something-very-secret"))
 
 var users = []entity.User{
 	{Name: "匿名", Password: "tokumei"},
-	{Name: "aaa", Password: "aaa"},
+}
+
+// POST Signup処理
+func Signup(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		t, err := template.ParseFiles("view/signup.html")
+		if err != nil {
+			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+			return
+		}
+
+		err = t.Execute(w, nil)
+		if err != nil {
+			log.Printf("controller:39, Excute error:%v\n", err)
+			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+			return
+		}
+	case http.MethodPost:
+		// POSTされたものをFormから受け取り
+		r.ParseForm()
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+		checkpass := r.FormValue("checkpassword")
+
+		tsignup, err := template.ParseFiles("view/signup.html")
+		if err != nil {
+			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+			return
+		}
+
+		tlogin, err := template.ParseFiles("view/login.html")
+		if err != nil {
+			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+			return
+		}
+
+		if username == "" || password == "" || checkpass == "" {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "入力されていない項目があります。"
+
+			err = tsignup.Execute(w, data)
+			if err != nil {
+				log.Printf("controller:39, Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		if password != checkpass {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "確認用再入力パスワードが一致していません。"
+
+			err = tsignup.Execute(w, data)
+			if err != nil {
+				log.Printf("controller:39, Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		for _, v := range users {
+			if v.Name == username {
+				// メッセージをテンプレートに渡す
+				var data entity.Data
+				data.Message = "そのユーザー名は既に使用されています。"
+
+				err = tsignup.Execute(w, data)
+				if err != nil {
+					log.Printf("controller:39, Excute error:%v\n", err)
+					http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+					return
+				}
+				return
+			}
+		}
+
+		user := entity.User{
+			Name:               username,
+			Password:           password,
+			ParticipatingRooms: []entity.ParticipatingRoom{},
+		}
+
+		users = append(users, user)
+
+		// メッセージをテンプレートに渡す
+		var data entity.Data
+		data.Message = "登録が完了しました。ログインしてください。"
+
+		err = tlogin.Execute(w, data)
+		if err != nil {
+			log.Printf("controller:39, Excute error:%v\n", err)
+			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+			return
+		}
+	default:
+		fmt.Fprintln(w, "controller:98, Method not allowed")
+		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
+		return
+	}
 }
 
 // POST Login処理
@@ -41,7 +147,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 
-		tindex, err := template.ParseFiles("view/roomtop.html")
+		troomtop, err := template.ParseFiles("view/roomtop.html")
 		if err != nil {
 			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
@@ -55,10 +161,24 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if username == "" || password == "" {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "入力されていない項目があります。"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("controller:39, Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
 		for _, v := range users {
 			if v.Name == username {
 				if v.Password == password {
-					// Room一覧をテンプレートに渡す
+					// Room一覧とメッセージをテンプレートに渡す
 					var data entity.Data
 					for k := range rooms {
 						data.Rooms = append(data.Rooms, k)
@@ -70,7 +190,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 					session.Values["username"] = username
 					session.Save(r, w)
 
-					err = tindex.Execute(w, data)
+					err = troomtop.Execute(w, data)
 					if err != nil {
 						log.Printf("controller:39, Excute error:%v\n", err)
 						http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -78,7 +198,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 					}
 					return
 				} else {
-					// Room一覧をテンプレートに渡す
+					// メッセージをテンプレートに渡す
 					var data entity.Data
 					data.Message = "パスワードが違います"
 
@@ -93,7 +213,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		// Room一覧をテンプレートに渡す
+		// メッセージをテンプレートに渡す
 		var data entity.Data
 		data.Message = "ユーザーが存在しませんでした。"
 
