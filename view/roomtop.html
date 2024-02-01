@@ -16,6 +16,10 @@
 <ul id="rooms"></ul>
 <button onclick="getRooms()">更新</button>
 
+<h2>参加中のRoom一覧</h2>
+<ul id="joinrooms"></ul>
+<button onclick="getJoinRooms()">更新</button>
+
 <p>作成するチャットルームのIDを入力してください。(1 ~ 999)</p>
 <form method="POST" action="/" required="required">
     <input type="number" min="1" max="999" name="create_roomid" placeholder="作成する部屋番号">

@@ -13,11 +13,12 @@ import (
 
 var store = sessions.NewCookieStore([]byte("something-very-secret"))
 
+// TODO:mapにしてみる？
 var users = []entity.User{
-	{Name: "匿名", Password: "tokumei"},
+	{Name: "匿名", Password: "qawsedrftgyhujikolp"},
 }
 
-// POST Signup処理
+// Signup処理
 func Signup(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -102,7 +103,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		user := entity.User{
 			Name:               username,
 			Password:           password,
-			ParticipatingRooms: []entity.ParticipatingRoom{},
+			ParticipatingRooms: make(map[*entity.ChatRoom]bool),
 		}
 
 		users = append(users, user)
@@ -124,7 +125,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// POST Login処理
+// Login処理
 func Login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -229,6 +230,112 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+// // Logout処理
+// func Logout(w http.ResponseWriter, r *http.Request) {
+// 	switch r.Method {
+// 	case http.MethodGet:
+// 		t, err := template.ParseFiles("view/login.html")
+// 		if err != nil {
+// 			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+// 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+// 			return
+// 		}
+
+// 		err = t.Execute(w, nil)
+// 		if err != nil {
+// 			log.Printf("controller:39, Excute error:%v\n", err)
+// 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+// 			return
+// 		}
+// 	case http.MethodPost:
+// 		// POSTされたものをFormから受け取り
+// 		r.ParseForm()
+// 		username := r.FormValue("username")
+// 		password := r.FormValue("password")
+
+// 		troomtop, err := template.ParseFiles("view/roomtop.html")
+// 		if err != nil {
+// 			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+// 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+// 			return
+// 		}
+
+// 		tlogin, err := template.ParseFiles("view/login.html")
+// 		if err != nil {
+// 			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+// 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+// 			return
+// 		}
+
+// 		if username == "" || password == "" {
+// 			// メッセージをテンプレートに渡す
+// 			var data entity.Data
+// 			data.Message = "入力されていない項目があります。"
+
+// 			err = tlogin.Execute(w, data)
+// 			if err != nil {
+// 				log.Printf("controller:39, Excute error:%v\n", err)
+// 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+// 				return
+// 			}
+// 			return
+// 		}
+
+// 		for _, v := range users {
+// 			if v.Name == username {
+// 				if v.Password == password {
+// 					// Room一覧とメッセージをテンプレートに渡す
+// 					var data entity.Data
+// 					for k := range rooms {
+// 						data.Rooms = append(data.Rooms, k)
+// 					}
+
+// 					data.Message = "ログインに成功しました。"
+
+// 					session, _ := store.Get(r, "Shakku")
+// 					session.Values["username"] = username
+// 					session.Save(r, w)
+
+// 					err = troomtop.Execute(w, data)
+// 					if err != nil {
+// 						log.Printf("controller:39, Excute error:%v\n", err)
+// 						http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+// 						return
+// 					}
+// 					return
+// 				} else {
+// 					// メッセージをテンプレートに渡す
+// 					var data entity.Data
+// 					data.Message = "パスワードが違います"
+
+// 					err = tlogin.Execute(w, data)
+// 					if err != nil {
+// 						log.Printf("controller:39, Excute error:%v\n", err)
+// 						http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+// 						return
+// 					}
+// 					return
+// 				}
+// 			}
+// 		}
+
+// 		// メッセージをテンプレートに渡す
+// 		var data entity.Data
+// 		data.Message = "ユーザーが存在しませんでした。"
+
+// 		err = tlogin.Execute(w, data)
+// 		if err != nil {
+// 			log.Printf("controller:39, Excute error:%v\n", err)
+// 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+// 			return
+// 		}
+// 	default:
+// 		fmt.Fprintln(w, "controller:98, Method not allowed")
+// 		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
+// 		return
+// 	}
+// }
 
 // 参加ユーザーの一覧を返す
 func RoomUsersList(w http.ResponseWriter, r *http.Request) {

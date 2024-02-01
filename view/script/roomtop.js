@@ -17,7 +17,25 @@ function getRooms() {
                 roomListElement.appendChild(listItem);
             });
         })
-        .catch(error => console.error('Error fetching room data:', error));
+        .catch(error => console.error('Error fetching rooms data:', error));
+}
+
+// 参加中のRoomの一覧を取得
+function getJoinRooms() {
+    document.getElementById('joinrooms').textContent = '';
+    fetch(protocol+"//"+domain+":"+port+"/joinrooms")
+        .then(response => response.json())
+        .then(data => {
+            const rooms = data.roomslist;
+
+            const roomListElement = document.getElementById("joinrooms");
+            rooms.forEach(room => {
+                const listItem = document.createElement('li');
+                listItem.textContent = room;
+                roomListElement.appendChild(listItem);
+            });
+        })
+        .catch(error => console.error('Error fetching joinrooms data:', error));
 }
 
 // サーバーページに遷移

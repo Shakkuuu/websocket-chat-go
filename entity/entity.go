@@ -41,10 +41,10 @@ type SentUser struct {
 type User struct {
 	Name               string
 	Password           string
-	ParticipatingRooms []ParticipatingRoom
+	ParticipatingRooms map[*ChatRoom]bool
 }
 
-type ParticipatingRoom struct {
-	Room     ChatRoom
-	IsMaster bool
-}
+// type ParticipatingRoom struct {
+// 	Room     *ChatRoom
+// 	IsMaster bool
+// }

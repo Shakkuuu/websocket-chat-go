@@ -71,8 +71,74 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// セッション読み取り
+		session, err := store.Get(r, "Shakku")
+		if err != nil {
+			log.Printf("controller:164, store.Get error: %v", err)
+			http.Error(w, "store.Get error", http.StatusInternalServerError)
+			return
+		}
+
+		username := session.Values["username"]
+		if username == nil {
+			fmt.Println("セッションなし")
+			tlogin, err := template.ParseFiles("view/login.html")
+			if err != nil {
+				log.Printf("controller:53, template.ParseFiles error:%v\n", err)
+				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("controller:93, Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		un := username.(string)
+		var user entity.User
+
+		var check bool
+		// ユーザーリストからセッションと一致するユーザーを持ってくる
+		for _, v := range users {
+			if un == v.Name {
+				user = v
+				check = true
+			}
+		}
+
+		if !check {
+			fmt.Println("セッション問題あり")
+			tlogin, err := template.ParseFiles("view/login.html")
+			if err != nil {
+				log.Printf("controller:53, template.ParseFiles error:%v\n", err)
+				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("controller:93, Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
 		// Room作成
-		model.CreateRoom(roomid, rooms)
+		room := model.CreateRoom(roomid, rooms)
+
+		// 参加中のルーム一覧にMasterとして追加
+		user.ParticipatingRooms[room] = true
 
 		t, err := template.ParseFiles("view/roomtop.html")
 		if err != nil {
@@ -181,6 +247,26 @@ func HandleConnection(ws *websocket.Conn) {
 		return
 	}
 
+	var user entity.User
+	// ユーザーリストからメッセージのNameと一致するユーザーを持ってくる
+	for _, u := range users {
+		if msg.Name == u.Name {
+			user = u
+		}
+	}
+
+	var check bool
+	// 既に参加しているかどうかを確認
+	for r := range user.ParticipatingRooms {
+		if r == room {
+			check = true
+		}
+	}
+	if !check {
+		// 参加中のルーム一覧に参加者として追加
+		user.ParticipatingRooms[room] = false
+	}
+
 	// Roomに参加
 	room.Clients[ws] = msg.Name
 	fmt.Println(room.Clients) // 参加者一覧 デバッグ用
@@ -264,6 +350,101 @@ func RoomsList(w http.ResponseWriter, r *http.Request) {
 
 		// jsonに変換
 		sentjson, err := json.Marshal(roomslist)
+		if err != nil {
+			log.Printf("controller:312, json.Marshal error: %v", err)
+			http.Error(w, "json.Marshal error", http.StatusInternalServerError)
+			return
+		}
+
+		// jsonで送信
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(sentjson)
+
+	default:
+		fmt.Fprintln(w, "controller:322, Method not allowed")
+		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+// 参加中のRoomの一覧を返す
+func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		var joinroomslist entity.SentRoomsList
+
+		// セッション読み取り
+		session, err := store.Get(r, "Shakku")
+		if err != nil {
+			log.Printf("controller:164, store.Get error: %v", err)
+			http.Error(w, "store.Get error", http.StatusInternalServerError)
+			return
+		}
+
+		username := session.Values["username"]
+		if username == nil {
+			fmt.Println("セッションなし")
+			tlogin, err := template.ParseFiles("view/login.html")
+			if err != nil {
+				log.Printf("controller:53, template.ParseFiles error:%v\n", err)
+				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("controller:93, Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		un := username.(string)
+		var user entity.User
+
+		var check bool
+		// ユーザーリストからセッションと一致するユーザーを持ってくる
+		for _, v := range users {
+			if un == v.Name {
+				user = v
+				check = true
+			}
+		}
+
+		if !check {
+			fmt.Println("セッション問題あり")
+			tlogin, err := template.ParseFiles("view/login.html")
+			if err != nil {
+				log.Printf("controller:53, template.ParseFiles error:%v\n", err)
+				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("controller:93, Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		// joinRoomを格納
+		for room := range user.ParticipatingRooms {
+			joinroomslist.RoomsList = append(joinroomslist.RoomsList, room.ID)
+		}
+
+		fmt.Println(joinroomslist.RoomsList)
+
+		// jsonに変換
+		sentjson, err := json.Marshal(joinroomslist)
 		if err != nil {
 			log.Printf("controller:312, json.Marshal error: %v", err)
 			http.Error(w, "json.Marshal error", http.StatusInternalServerError)
