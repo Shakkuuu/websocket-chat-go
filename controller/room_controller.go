@@ -72,7 +72,7 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// セッション読み取り
-		session, err := store.Get(r, "Shakku")
+		session, err := store.Get(r, "Shakkuuu-websocket-chat-go")
 		if err != nil {
 			log.Printf("controller:164, store.Get error: %v", err)
 			http.Error(w, "store.Get error", http.StatusInternalServerError)
@@ -374,7 +374,7 @@ func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
 		var joinroomslist entity.SentRoomsList
 
 		// セッション読み取り
-		session, err := store.Get(r, "Shakku")
+		session, err := store.Get(r, "Shakkuuu-websocket-chat-go")
 		if err != nil {
 			log.Printf("controller:164, store.Get error: %v", err)
 			http.Error(w, "store.Get error", http.StatusInternalServerError)
