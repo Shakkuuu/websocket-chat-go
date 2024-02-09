@@ -24,14 +24,14 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		t, err := template.ParseFiles("view/signup.html")
 		if err != nil {
-			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+			log.Printf("template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 			return
 		}
 
 		err = t.Execute(w, nil)
 		if err != nil {
-			log.Printf("controller:39, Excute error:%v\n", err)
+			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 			return
 		}
@@ -44,14 +44,14 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 		tsignup, err := template.ParseFiles("view/signup.html")
 		if err != nil {
-			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+			log.Printf("template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 			return
 		}
 
 		tlogin, err := template.ParseFiles("view/login.html")
 		if err != nil {
-			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+			log.Printf("template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 			return
 		}
@@ -63,7 +63,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 			err = tsignup.Execute(w, data)
 			if err != nil {
-				log.Printf("controller:39, Excute error:%v\n", err)
+				log.Printf("Excute error:%v\n", err)
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 				return
 			}
@@ -77,7 +77,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 			err = tsignup.Execute(w, data)
 			if err != nil {
-				log.Printf("controller:39, Excute error:%v\n", err)
+				log.Printf("Excute error:%v\n", err)
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 				return
 			}
@@ -92,7 +92,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 				err = tsignup.Execute(w, data)
 				if err != nil {
-					log.Printf("controller:39, Excute error:%v\n", err)
+					log.Printf("Excute error:%v\n", err)
 					http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 					return
 				}
@@ -114,12 +114,12 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 		err = tlogin.Execute(w, data)
 		if err != nil {
-			log.Printf("controller:39, Excute error:%v\n", err)
+			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 			return
 		}
 	default:
-		fmt.Fprintln(w, "controller:98, Method not allowed")
+		fmt.Fprintln(w, "Method not allowed")
 		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
 		return
 	}
@@ -131,14 +131,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		t, err := template.ParseFiles("view/login.html")
 		if err != nil {
-			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+			log.Printf("template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 			return
 		}
 
 		err = t.Execute(w, nil)
 		if err != nil {
-			log.Printf("controller:39, Excute error:%v\n", err)
+			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 			return
 		}
@@ -150,14 +150,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		troomtop, err := template.ParseFiles("view/roomtop.html")
 		if err != nil {
-			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+			log.Printf("template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 			return
 		}
 
 		tlogin, err := template.ParseFiles("view/login.html")
 		if err != nil {
-			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+			log.Printf("template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 			return
 		}
@@ -169,7 +169,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 			err = tlogin.Execute(w, data)
 			if err != nil {
-				log.Printf("controller:39, Excute error:%v\n", err)
+				log.Printf("Excute error:%v\n", err)
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 				return
 			}
@@ -193,7 +193,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 					err = troomtop.Execute(w, data)
 					if err != nil {
-						log.Printf("controller:39, Excute error:%v\n", err)
+						log.Printf("Excute error:%v\n", err)
 						http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 						return
 					}
@@ -205,7 +205,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 					err = tlogin.Execute(w, data)
 					if err != nil {
-						log.Printf("controller:39, Excute error:%v\n", err)
+						log.Printf("Excute error:%v\n", err)
 						http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 						return
 					}
@@ -220,12 +220,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		err = tlogin.Execute(w, data)
 		if err != nil {
-			log.Printf("controller:39, Excute error:%v\n", err)
+			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 			return
 		}
 	default:
-		fmt.Fprintln(w, "controller:98, Method not allowed")
+		fmt.Fprintln(w, "Method not allowed")
 		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
 		return
 	}
@@ -237,14 +237,14 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		t, err := template.ParseFiles("view/login.html")
 		if err != nil {
-			log.Printf("controller:26, template.ParseFiles error:%v\n", err)
+			log.Printf("template.ParseFiles error:%v\n", err)
 			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 			return
 		}
 
 		session, err := store.Get(r, "Shakkuuu-websocket-chat-go")
 		if err != nil {
-			log.Printf("controller:164, store.Get error: %v", err)
+			log.Printf("store.Get error: %v", err)
 			http.Error(w, "store.Get error", http.StatusInternalServerError)
 			return
 		}
@@ -258,12 +258,12 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 		err = t.Execute(w, data)
 		if err != nil {
-			log.Printf("controller:39, Excute error:%v\n", err)
+			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 			return
 		}
 	default:
-		fmt.Fprintln(w, "controller:98, Method not allowed")
+		fmt.Fprintln(w, "Method not allowed")
 		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
 		return
 	}
@@ -284,7 +284,7 @@ func RoomUsersList(w http.ResponseWriter, r *http.Request) {
 		// roomがあるか確認
 		room, exists := rooms[roomid]
 		if !exists {
-			log.Println("controller:269, Roomが見つかりませんでした")
+			log.Println("Roomが見つかりませんでした")
 			http.Error(w, "Roomが見つかりませんでした", http.StatusNotFound)
 			return
 		}
@@ -297,7 +297,7 @@ func RoomUsersList(w http.ResponseWriter, r *http.Request) {
 		// jsonに変換
 		sentjson, err := json.Marshal(roomuserslist)
 		if err != nil {
-			log.Printf("controller:282, json.Marshal error: %v", err)
+			log.Printf("json.Marshal error: %v", err)
 			http.Error(w, "json.Marshal error", http.StatusInternalServerError)
 			return
 		}
@@ -307,7 +307,7 @@ func RoomUsersList(w http.ResponseWriter, r *http.Request) {
 		w.Write(sentjson)
 
 	default:
-		fmt.Fprintln(w, "controller:292, Method not allowed")
+		fmt.Fprintln(w, "Method not allowed")
 		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
 		return
 	}
@@ -322,7 +322,7 @@ func GetUserName(w http.ResponseWriter, r *http.Request) {
 		// セッション読み取り
 		session, err := store.Get(r, "Shakkuuu-websocket-chat-go")
 		if err != nil {
-			log.Printf("controller:164, store.Get error: %v", err)
+			log.Printf("store.Get error: %v", err)
 			http.Error(w, "store.Get error", http.StatusInternalServerError)
 			return
 		}
@@ -334,7 +334,7 @@ func GetUserName(w http.ResponseWriter, r *http.Request) {
 			// jsonに変換
 			sentjson, err := json.Marshal(sentuser)
 			if err != nil {
-				log.Printf("controller:282, json.Marshal error: %v", err)
+				log.Printf("json.Marshal error: %v", err)
 				http.Error(w, "json.Marshal error", http.StatusInternalServerError)
 				return
 			}
@@ -350,7 +350,7 @@ func GetUserName(w http.ResponseWriter, r *http.Request) {
 		// jsonに変換
 		sentjson, err := json.Marshal(sentuser)
 		if err != nil {
-			log.Printf("controller:282, json.Marshal error: %v", err)
+			log.Printf("json.Marshal error: %v", err)
 			http.Error(w, "json.Marshal error", http.StatusInternalServerError)
 			return
 		}
@@ -359,7 +359,7 @@ func GetUserName(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(sentjson)
 	default:
-		fmt.Fprintln(w, "controller:292, Method not allowed")
+		fmt.Fprintln(w, "Method not allowed")
 		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
 		return
 	}

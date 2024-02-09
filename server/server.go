@@ -2,6 +2,7 @@ package server
 
 import (
 	"embed"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -18,8 +19,13 @@ func loggingMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 
-		log.Printf("・[%s] %s %s %s\n", r.Method, r.RemoteAddr, r.URL, time.Since(start))
+		fmt.Printf("%s: [%s] %s %s %s\n", timeToStr(start), r.Method, r.RemoteAddr, r.URL, time.Since(start))
 	})
+}
+
+// "YYYY-MM-DD HH-MM-SS"に変換
+func timeToStr(t time.Time) string {
+	return t.Format("2006-01-02 15:04:05")
 }
 
 func Init(port string, view embed.FS) {
@@ -40,7 +46,7 @@ func Init(port string, view embed.FS) {
 	// サーバ起動
 	err := http.ListenAndServe(port, nil)
 	if err != nil {
-		log.Printf("server:27, ListenAndServe error:%v\n", err)
+		log.Printf("ListenAndServe error:%v\n", err)
 		os.Exit(1)
 	}
 }
