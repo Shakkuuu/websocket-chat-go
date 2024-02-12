@@ -6,20 +6,23 @@
     <link rel="icon" href="/view/icon/favicon.ico" />
     <link rel="stylesheet" href="/view/style/main.css">
     <title>signup</title>
+    <script src="/view/script/signup-login.js"></script>
 </head>
 <body>
     <h1>signup</h1>
     <p>{{.Message}}</p>
     <p>user登録</p>
-    <form action="/signup" method="POST">
+    <form id="passwordform" action="/signup" method="POST">
         <div>
             <input type="text" name="username" placeholder="username" autocomplete="off">
         </div>
         <div>
-            <input type="password" name="password" placeholder="password" autocomplete="off">
+            <input type="password" id="password" name="password" placeholder="password" autocomplete="off">
         </div>
         <div>
             <input type="password" name="checkpassword" placeholder="checkpassword" autocomplete="off">
+            <p>※パスワードは半角英数字をそれぞれ1種類以上含み、8文字以上100文字以下である必要があります。</p>
+            <p>(以下の記号が使用可能'!@#$%^&*()_+-=')</p>
         </div>
         <p><input type="submit" value="登録"></p>
     </form>
