@@ -36,6 +36,7 @@ func Init(port string, view embed.FS) {
 	http.Handle("/signup", loggingMiddleware(http.HandlerFunc(controller.Signup)))           // サインアップページ
 	http.Handle("/logout", loggingMiddleware(http.HandlerFunc(controller.Logout)))           // ログアウト処理
 	http.Handle("/room", loggingMiddleware(http.HandlerFunc(controller.Room)))               // Room内のページ
+	http.Handle("/deleteroom", loggingMiddleware(http.HandlerFunc(controller.DeleteRoom)))   // Room削除
 	http.Handle("/rooms", loggingMiddleware(http.HandlerFunc(controller.RoomsList)))         // Room一覧取得
 	http.Handle("/joinrooms", loggingMiddleware(http.HandlerFunc(controller.JoinRoomsList))) // 参加中のRoom一覧取得
 	http.Handle("/users", loggingMiddleware(http.HandlerFunc(controller.RoomUsersList)))     // User一覧取得

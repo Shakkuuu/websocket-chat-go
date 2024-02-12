@@ -28,13 +28,7 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Room一覧をテンプレートに渡す
-		var data entity.Data
-		for k := range rooms {
-			data.Rooms = append(data.Rooms, k)
-		}
-
-		err = t.Execute(w, data)
+		err = t.Execute(w, nil)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -55,11 +49,8 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// Room一覧とメッセージをテンプレートに渡す
+			// メッセージをテンプレートに渡す
 			var data entity.Data
-			for k := range rooms {
-				data.Rooms = append(data.Rooms, k)
-			}
 			data.Message = "ルーム " + roomid + " は既にあります"
 
 			err = t.Execute(w, data)
@@ -147,11 +138,8 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Room一覧とメッセージをテンプレートに渡す
+		// メッセージをテンプレートに渡す
 		var data entity.Data
-		for k := range rooms {
-			data.Rooms = append(data.Rooms, k)
-		}
 		data.Message = "ルーム " + roomid + " が作成されました。"
 
 		err = t.Execute(w, data)
@@ -186,11 +174,8 @@ func Room(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// Roomの一覧とメッセージをテンプレートに渡す
+			// メッセージをテンプレートに渡す
 			var data entity.Data
-			for k := range rooms {
-				data.Rooms = append(data.Rooms, k)
-			}
 			data.Message = "そのIDのルームは見つかりませんでした。"
 
 			err = t.Execute(w, data)
@@ -214,6 +199,151 @@ func Room(w http.ResponseWriter, r *http.Request) {
 		for _, username := range room.Clients {
 			data.Users = append(data.Users, username)
 		}
+
+		err = t.Execute(w, data)
+		if err != nil {
+			log.Printf("Excute error:%v\n", err)
+			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+			return
+		}
+	default:
+		fmt.Fprintln(w, "Method not allowed")
+		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+// Room削除
+func DeleteRoom(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		// クエリ読み取り
+		r.ParseForm()
+		roomid := r.URL.Query().Get("roomid")
+
+		// roomがあるか確認
+		room, exists := rooms[roomid]
+		if !exists {
+			t, err := template.ParseFiles("view/roomtop.html")
+			if err != nil {
+				log.Printf("template.ParseFiles error:%v\n", err)
+				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+				return
+			}
+
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "そのIDのルームは見つかりませんでした。"
+
+			err = t.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		// セッション読み取り
+		session, err := store.Get(r, "Shakkuuu-websocket-chat-go")
+		if err != nil {
+			log.Printf("store.Get error: %v", err)
+			http.Error(w, "store.Get error", http.StatusInternalServerError)
+			return
+		}
+
+		username := session.Values["username"]
+		if username == nil {
+			fmt.Println("セッションなし")
+			tlogin, err := template.ParseFiles("view/login.html")
+			if err != nil {
+				log.Printf("template.ParseFiles error:%v\n", err)
+				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		un := username.(string)
+		var user entity.User
+
+		var check bool
+		// ユーザーリストからセッションと一致するユーザーを持ってくる
+		for _, v := range users {
+			if un == v.Name {
+				user = v
+				check = true
+			}
+		}
+
+		if !check {
+			fmt.Println("セッション問題あり")
+			tlogin, err := template.ParseFiles("view/login.html")
+			if err != nil {
+				log.Printf("template.ParseFiles error:%v\n", err)
+				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		if !user.ParticipatingRooms[room] {
+			t, err := template.ParseFiles("view/roomtop.html")
+			if err != nil {
+				log.Printf("template.ParseFiles error:%v\n", err)
+				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+				return
+			}
+
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "部屋の作成者ではないため、部屋を削除できませんでした。"
+
+			err = t.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		t, err := template.ParseFiles("view/roomtop.html")
+		if err != nil {
+			log.Printf("template.ParseFiles error:%v\n", err)
+			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
+			return
+		}
+
+		for _, u := range users {
+			delete(u.ParticipatingRooms, room)
+		}
+
+		delete(rooms, roomid)
+
+		// メッセージをテンプレートに渡す
+		var data entity.Data
+		data.Message = "部屋を削除しました。"
 
 		err = t.Execute(w, data)
 		if err != nil {

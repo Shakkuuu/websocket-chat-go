@@ -43,8 +43,3 @@ type User struct {
 	Password           string
 	ParticipatingRooms map[*ChatRoom]bool
 }
-
-// type ParticipatingRoom struct {
-// 	Room     *ChatRoom
-// 	IsMaster bool
-// }
