@@ -3,7 +3,6 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 
@@ -21,14 +20,7 @@ var sentmessage = make(chan entity.Message) // 各クライアントに送信す
 func RoomTop(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		t, err := template.ParseFiles("view/roomtop.html")
-		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
-			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-			return
-		}
-
-		err = t.Execute(w, nil)
+		err = troomtop.Execute(w, nil)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -42,18 +34,11 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		_, exists := rooms[roomid]
 		if exists { // roomが既に存在していたら
 			// 作成失敗メッセージ表示
-			t, err := template.ParseFiles("view/roomtop.html")
-			if err != nil {
-				log.Printf("template.ParseFiles error:%v\n", err)
-				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-				return
-			}
-
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "ルーム " + roomid + " は既にあります"
 
-			err = t.Execute(w, data)
+			err = troomtop.Execute(w, data)
 			if err != nil {
 				log.Printf("Excute error:%v\n", err)
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -63,7 +48,7 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// セッション読み取り
-		session, err := store.Get(r, "Shakkuuu-websocket-chat-go")
+		session, err = store.Get(r, SESSION_NAME)
 		if err != nil {
 			log.Printf("store.Get error: %v", err)
 			http.Error(w, "store.Get error", http.StatusInternalServerError)
@@ -73,12 +58,6 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		username := session.Values["username"]
 		if username == nil {
 			fmt.Println("セッションなし")
-			tlogin, err := template.ParseFiles("view/login.html")
-			if err != nil {
-				log.Printf("template.ParseFiles error:%v\n", err)
-				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-				return
-			}
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -106,12 +85,6 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 
 		if !check {
 			fmt.Println("セッション問題あり")
-			tlogin, err := template.ParseFiles("view/login.html")
-			if err != nil {
-				log.Printf("template.ParseFiles error:%v\n", err)
-				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-				return
-			}
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -131,18 +104,11 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		// 参加中のルーム一覧にMasterとして追加
 		user.ParticipatingRooms[room] = true
 
-		t, err := template.ParseFiles("view/roomtop.html")
-		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
-			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-			return
-		}
-
 		// メッセージをテンプレートに渡す
 		var data entity.Data
 		data.Message = "ルーム " + roomid + " が作成されました。"
 
-		err = t.Execute(w, data)
+		err = troomtop.Execute(w, data)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -167,30 +133,16 @@ func Room(w http.ResponseWriter, r *http.Request) {
 		if !exists { // 指定した部屋が存在していなかったら
 			log.Printf("This room was not found")
 
-			t, err := template.ParseFiles("view/roomtop.html")
-			if err != nil {
-				log.Printf("template.ParseFiles error:%v\n", err)
-				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-				return
-			}
-
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "そのIDのルームは見つかりませんでした。"
 
-			err = t.Execute(w, data)
+			err = troomtop.Execute(w, data)
 			if err != nil {
 				log.Printf("Excute error:%v\n", err)
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 				return
 			}
-			return
-		}
-
-		t, err := template.ParseFiles("view/room.html")
-		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
-			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
 			return
 		}
 
@@ -200,7 +152,7 @@ func Room(w http.ResponseWriter, r *http.Request) {
 			data.Users = append(data.Users, username)
 		}
 
-		err = t.Execute(w, data)
+		err = troom.Execute(w, data)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -224,18 +176,11 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		// roomがあるか確認
 		room, exists := rooms[roomid]
 		if !exists {
-			t, err := template.ParseFiles("view/roomtop.html")
-			if err != nil {
-				log.Printf("template.ParseFiles error:%v\n", err)
-				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-				return
-			}
-
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "そのIDのルームは見つかりませんでした。"
 
-			err = t.Execute(w, data)
+			err = troomtop.Execute(w, data)
 			if err != nil {
 				log.Printf("Excute error:%v\n", err)
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -245,7 +190,7 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// セッション読み取り
-		session, err := store.Get(r, "Shakkuuu-websocket-chat-go")
+		session, err = store.Get(r, SESSION_NAME)
 		if err != nil {
 			log.Printf("store.Get error: %v", err)
 			http.Error(w, "store.Get error", http.StatusInternalServerError)
@@ -255,12 +200,6 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		username := session.Values["username"]
 		if username == nil {
 			fmt.Println("セッションなし")
-			tlogin, err := template.ParseFiles("view/login.html")
-			if err != nil {
-				log.Printf("template.ParseFiles error:%v\n", err)
-				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-				return
-			}
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -288,12 +227,6 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 
 		if !check {
 			fmt.Println("セッション問題あり")
-			tlogin, err := template.ParseFiles("view/login.html")
-			if err != nil {
-				log.Printf("template.ParseFiles error:%v\n", err)
-				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-				return
-			}
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -308,18 +241,11 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if !user.ParticipatingRooms[room] {
-			t, err := template.ParseFiles("view/roomtop.html")
-			if err != nil {
-				log.Printf("template.ParseFiles error:%v\n", err)
-				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-				return
-			}
-
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "部屋の作成者ではないため、部屋を削除できませんでした。"
 
-			err = t.Execute(w, data)
+			err = troomtop.Execute(w, data)
 			if err != nil {
 				log.Printf("Excute error:%v\n", err)
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -328,24 +254,19 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		t, err := template.ParseFiles("view/roomtop.html")
-		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
-			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-			return
-		}
-
+		// ユーザーの参加中ルームリストからも削除
 		for _, u := range users {
 			delete(u.ParticipatingRooms, room)
 		}
 
+		// 部屋削除
 		delete(rooms, roomid)
 
 		// メッセージをテンプレートに渡す
 		var data entity.Data
 		data.Message = "部屋を削除しました。"
 
-		err = t.Execute(w, data)
+		err = troomtop.Execute(w, data)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -504,7 +425,7 @@ func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
 		var joinroomslist entity.SentRoomsList
 
 		// セッション読み取り
-		session, err := store.Get(r, "Shakkuuu-websocket-chat-go")
+		session, err = store.Get(r, SESSION_NAME)
 		if err != nil {
 			log.Printf("store.Get error: %v", err)
 			http.Error(w, "store.Get error", http.StatusInternalServerError)
@@ -514,22 +435,7 @@ func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
 		username := session.Values["username"]
 		if username == nil {
 			fmt.Println("セッションなし")
-			tlogin, err := template.ParseFiles("view/login.html")
-			if err != nil {
-				log.Printf("template.ParseFiles error:%v\n", err)
-				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-				return
-			}
-			// メッセージをテンプレートに渡す
-			var data entity.Data
-			data.Message = "再ログインしてください"
-
-			err = tlogin.Execute(w, data)
-			if err != nil {
-				log.Printf("Excute error:%v\n", err)
-				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
-				return
-			}
+			http.Error(w, "session not found", http.StatusUnauthorized)
 			return
 		}
 
@@ -547,22 +453,7 @@ func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
 
 		if !check {
 			fmt.Println("セッション問題あり")
-			tlogin, err := template.ParseFiles("view/login.html")
-			if err != nil {
-				log.Printf("template.ParseFiles error:%v\n", err)
-				http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-				return
-			}
-			// メッセージをテンプレートに渡す
-			var data entity.Data
-			data.Message = "再ログインしてください"
-
-			err = tlogin.Execute(w, data)
-			if err != nil {
-				log.Printf("Excute error:%v\n", err)
-				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
-				return
-			}
+			http.Error(w, "session is posiible", http.StatusUnauthorized)
 			return
 		}
 

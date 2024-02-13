@@ -3,15 +3,12 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"websocket-chat/entity"
-
-	"github.com/gorilla/sessions"
 )
 
-var store = sessions.NewCookieStore([]byte("something-very-secret"))
+// var store = sessions.NewCookieStore([]byte("something-very-secret"))
 
 // TODO:mapにしてみる？
 var users = []entity.User{
@@ -22,14 +19,7 @@ var users = []entity.User{
 func Signup(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		t, err := template.ParseFiles("view/signup.html")
-		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
-			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-			return
-		}
-
-		err = t.Execute(w, nil)
+		err = tsignup.Execute(w, nil)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -41,20 +31,6 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 		checkpass := r.FormValue("checkpassword")
-
-		tsignup, err := template.ParseFiles("view/signup.html")
-		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
-			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-			return
-		}
-
-		tlogin, err := template.ParseFiles("view/login.html")
-		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
-			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-			return
-		}
 
 		if username == "" || password == "" || checkpass == "" {
 			// メッセージをテンプレートに渡す
@@ -129,14 +105,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 func Login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		t, err := template.ParseFiles("view/login.html")
-		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
-			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-			return
-		}
-
-		err = t.Execute(w, nil)
+		err = tlogin.Execute(w, nil)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -147,20 +116,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		username := r.FormValue("username")
 		password := r.FormValue("password")
-
-		troomtop, err := template.ParseFiles("view/roomtop.html")
-		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
-			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-			return
-		}
-
-		tlogin, err := template.ParseFiles("view/login.html")
-		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
-			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-			return
-		}
 
 		if username == "" || password == "" {
 			// メッセージをテンプレートに渡す
@@ -187,7 +142,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 					data.Message = "ログインに成功しました。"
 
-					session, _ := store.Get(r, "Shakkuuu-websocket-chat-go")
+					session, _ = store.Get(r, SESSION_NAME)
 					session.Values["username"] = username
 					session.Save(r, w)
 
@@ -235,14 +190,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func Logout(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		t, err := template.ParseFiles("view/login.html")
-		if err != nil {
-			log.Printf("template.ParseFiles error:%v\n", err)
-			http.Error(w, "ページの読み込みに失敗しました。", http.StatusInternalServerError)
-			return
-		}
-
-		session, err := store.Get(r, "Shakkuuu-websocket-chat-go")
+		session, err = store.Get(r, SESSION_NAME)
 		if err != nil {
 			log.Printf("store.Get error: %v", err)
 			http.Error(w, "store.Get error", http.StatusInternalServerError)
@@ -256,7 +204,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		var data entity.Data
 		data.Message = "ログアウトしました。ログインしてください。"
 
-		err = t.Execute(w, data)
+		err = tlogin.Execute(w, data)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -320,7 +268,7 @@ func GetUserName(w http.ResponseWriter, r *http.Request) {
 		var sentuser entity.SentUser
 
 		// セッション読み取り
-		session, err := store.Get(r, "Shakkuuu-websocket-chat-go")
+		session, err := store.Get(r, SESSION_NAME)
 		if err != nil {
 			log.Printf("store.Get error: %v", err)
 			http.Error(w, "store.Get error", http.StatusInternalServerError)
@@ -330,18 +278,7 @@ func GetUserName(w http.ResponseWriter, r *http.Request) {
 		username := session.Values["username"]
 		if username == nil {
 			fmt.Println("セッションなし")
-			sentuser.Name = ""
-			// jsonに変換
-			sentjson, err := json.Marshal(sentuser)
-			if err != nil {
-				log.Printf("json.Marshal error: %v", err)
-				http.Error(w, "json.Marshal error", http.StatusInternalServerError)
-				return
-			}
-
-			// jsonで送信
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(sentjson)
+			http.Error(w, "session not found", http.StatusUnauthorized)
 			return
 		}
 

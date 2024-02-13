@@ -13,6 +13,8 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+var err error
+
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -45,7 +47,7 @@ func Init(port string, view embed.FS) {
 	go controller.HandleMessages()                                                           // goroutineとチャネルで常にメッセージを待つ
 
 	// サーバ起動
-	err := http.ListenAndServe(port, nil)
+	err = http.ListenAndServe(port, nil)
 	if err != nil {
 		log.Printf("ListenAndServe error:%v\n", err)
 		os.Exit(1)

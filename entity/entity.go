@@ -34,10 +34,12 @@ type SentRoomsList struct {
 	RoomsList []string `json:"roomslist"`
 }
 
+// ユーザー名送信用
 type SentUser struct {
 	Name string `json:"name"`
 }
 
+// ユーザー管理
 type User struct {
 	Name               string
 	Password           string
