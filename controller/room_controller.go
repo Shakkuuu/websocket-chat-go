@@ -48,16 +48,9 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// セッション読み取り
-		session, err = store.Get(r, SESSION_NAME)
+		un, err := SessionToGetName(r)
 		if err != nil {
-			log.Printf("store.Get error: %v", err)
-			http.Error(w, "store.Get error", http.StatusInternalServerError)
-			return
-		}
-
-		username := session.Values["username"]
-		if username == nil {
-			fmt.Println("セッションなし")
+			log.Printf("SessionToGetName error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -71,9 +64,7 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		un := username.(string)
 		var user entity.User
-
 		var check bool
 		// ユーザーリストからセッションと一致するユーザーを持ってくる
 		for _, v := range users {
@@ -190,16 +181,9 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// セッション読み取り
-		session, err = store.Get(r, SESSION_NAME)
+		un, err := SessionToGetName(r)
 		if err != nil {
-			log.Printf("store.Get error: %v", err)
-			http.Error(w, "store.Get error", http.StatusInternalServerError)
-			return
-		}
-
-		username := session.Values["username"]
-		if username == nil {
-			fmt.Println("セッションなし")
+			log.Printf("SessionToGetName error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -213,9 +197,7 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		un := username.(string)
 		var user entity.User
-
 		var check bool
 		// ユーザーリストからセッションと一致するユーザーを持ってくる
 		for _, v := range users {
@@ -425,23 +407,23 @@ func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
 		var joinroomslist entity.SentRoomsList
 
 		// セッション読み取り
-		session, err = store.Get(r, SESSION_NAME)
+		un, err := SessionToGetName(r)
 		if err != nil {
-			log.Printf("store.Get error: %v", err)
-			http.Error(w, "store.Get error", http.StatusInternalServerError)
+			log.Printf("SessionToGetName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
 			return
 		}
 
-		username := session.Values["username"]
-		if username == nil {
-			fmt.Println("セッションなし")
-			http.Error(w, "session not found", http.StatusUnauthorized)
-			return
-		}
-
-		un := username.(string)
 		var user entity.User
-
 		var check bool
 		// ユーザーリストからセッションと一致するユーザーを持ってくる
 		for _, v := range users {

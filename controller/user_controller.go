@@ -8,9 +8,7 @@ import (
 	"websocket-chat/entity"
 )
 
-// var store = sessions.NewCookieStore([]byte("something-very-secret"))
-
-// TODO:mapにしてみる？
+// TODO:dbにしてみる？
 var users = []entity.User{
 	{Name: "匿名", Password: "qawsedrftgyhujikolp"},
 }
@@ -190,10 +188,19 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func Logout(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
+		// セッション確認
 		session, err = store.Get(r, SESSION_NAME)
 		if err != nil {
-			log.Printf("store.Get error: %v", err)
-			http.Error(w, "store.Get error", http.StatusInternalServerError)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
 			return
 		}
 		// セッション削除
@@ -268,21 +275,23 @@ func GetUserName(w http.ResponseWriter, r *http.Request) {
 		var sentuser entity.SentUser
 
 		// セッション読み取り
-		session, err := store.Get(r, SESSION_NAME)
+		un, err := SessionToGetName(r)
 		if err != nil {
-			log.Printf("store.Get error: %v", err)
-			http.Error(w, "store.Get error", http.StatusInternalServerError)
+			log.Printf("SessionToGetName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
 			return
 		}
 
-		username := session.Values["username"]
-		if username == nil {
-			fmt.Println("セッションなし")
-			http.Error(w, "session not found", http.StatusUnauthorized)
-			return
-		}
-
-		sentuser.Name = username.(string)
+		sentuser.Name = un
 
 		// jsonに変換
 		sentjson, err := json.Marshal(sentuser)
