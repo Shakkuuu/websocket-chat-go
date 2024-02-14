@@ -14,6 +14,7 @@ import (
 )
 
 var err error
+var accesslogfile *os.File
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +22,9 @@ func loggingMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 
-		fmt.Printf("%s: [%s] %s %s %s\n", timeToStr(start), r.Method, r.RemoteAddr, r.URL, time.Since(start))
+		accesslog := fmt.Sprintf("%s: [%s] %s %s %s\n", timeToStr(start), r.Method, r.RemoteAddr, r.URL, time.Since(start))
+		fmt.Print(accesslog)
+		fmt.Fprint(accesslogfile, accesslog)
 	})
 }
 
@@ -30,7 +33,10 @@ func timeToStr(t time.Time) string {
 	return t.Format("2006-01-02 15:04:05")
 }
 
-func Init(port string, view embed.FS) {
+func Init(port string, view embed.FS, f *os.File) {
+	// 出力先ファイル設定
+	accesslogfile = f
+
 	http.Handle("/view/", http.FileServer(http.FS(view)))
 
 	http.Handle("/", loggingMiddleware(http.HandlerFunc(controller.RoomTop)))                // roomtopページ

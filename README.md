@@ -13,7 +13,6 @@ SESSION_KEY="hogefuga"
 
 - 見た目
 - コードまとめる
-- ログをファイルに出力
 - ユーザー一覧をdbに保存(mysqlじゃない簡易的なやつでいいかも)
 - htmlで入力必須かつpattern入れているが、サーバー側でも実装する費用があるのか
 
@@ -31,6 +30,7 @@ SESSION_KEY="hogefuga"
 - sessionをサーバー起動時に設定してenvに対応できるように ok
 - セッションキー デプロイ時はコンテナ起動時などに設定しておく、.envでやるのはキツそう？ できた
 - session取得系の処理を関数でまとめる ok
+- ログをファイルに出力 ok (log.SetOutput()でログの出力先を変更できた。io.MultiWriter(os.Stderr, errorfile)を使用することで、標準エラー出力とerror.logファイルの両方にエラーログを出力できるようにした。アクセスの方はfmt.Fprintで出力)
 - 人がいなくなったら自動削除？ no
 - クライアントがわのName消せるかもそれでサーバー側のSessionのみでName管理 wsの時につまる
 - ログイン画面にゲストログイン追加 nasi
