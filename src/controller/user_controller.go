@@ -55,7 +55,20 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// ユーザー一覧取得
-		users := model.GetUsers()
+		users, err := model.GetUsers()
+		if err != nil {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "データベースとの接続に失敗しました。"
+
+			err = tsignup.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
 
 		for _, v := range users {
 			if v.Name == username {
@@ -74,13 +87,25 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		}
 
 		user := entity.User{
-			Name:               username,
-			Password:           password,
-			ParticipatingRooms: make(map[*entity.ChatRoom]bool),
+			Name:     username,
+			Password: password,
 		}
 
 		// ユーザー追加
-		model.AddUser(user)
+		err = model.AddUser(&user)
+		if err != nil {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "データベースとの接続に失敗しました。"
+
+			err = tsignup.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
 
 		// メッセージをテンプレートに渡す
 		var data entity.Data
@@ -130,7 +155,20 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// ユーザー一覧取得
-		users := model.GetUsers()
+		users, err := model.GetUsers()
+		if err != nil {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "データベースとの接続に失敗しました。"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
 
 		// Room一覧取得
 		rooms := model.GetRooms()

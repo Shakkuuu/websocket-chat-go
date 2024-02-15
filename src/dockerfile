@@ -10,4 +10,4 @@ RUN go mod tidy
 EXPOSE 8000
 
 # 起動コマンド
-CMD ["go", "run", "main.go"]
+# CMD ["go", "run", "main.go"]

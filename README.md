@@ -16,6 +16,7 @@ SESSION_KEY="hogefuga"
 - 見た目
 - コードまとめる
 - ユーザー一覧をdbに保存(mysqlじゃない簡易的なやつでいいかも)
+- サーバーを安全に終了Graceful shutdown (Dockerfileでgo run main.goのコマンドを実行させずに、コンテナに入って実行しないと、docker-composeを終了時にコンテナ自体が終了されてしまい、goにシグナルがうまく飛ばされない)
 - ユーザー削除
 - パスワード変更
 - ユーザー名変更

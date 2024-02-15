@@ -1,6 +1,8 @@
 package entity
 
-import "golang.org/x/net/websocket"
+import (
+	"golang.org/x/net/websocket"
+)
 
 // クライアントが参加するチャットルーム
 type ChatRoom struct {
@@ -41,7 +43,30 @@ type SentUser struct {
 
 // ユーザー管理
 type User struct {
-	Name               string
-	Password           string
-	ParticipatingRooms map[*ChatRoom]bool
+	ID       int    `gorm:"unique"`
+	Name     string `gorm:"unique"`
+	Password string
 }
+
+type ParticipatingRoom struct {
+	ID       int `gorm:"unique"`
+	RoomID   string
+	IsMaster bool
+	UserName string
+}
+
+// type User struct {
+// 	ID                 int    `gorm:"unique"`
+// 	Name               string `gorm:"unique"`
+// 	Password           string
+// 	ParticipatingRooms map[*ChatRoom]bool `gorm:"type:JSON"`
+// 	CreatedAt          time.Time
+// }
+
+// 参加中の部屋情報
+// type ParticipatingRoom struct {
+// 	ID int `gorm:"unique"`
+// 	Room ChatRoom
+// 	IsMaster bool
+// 	UserName string
+// }

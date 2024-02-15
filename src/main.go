@@ -6,7 +6,10 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"websocket-chat/controller"
+	"websocket-chat/db"
 	"websocket-chat/server"
 )
 
@@ -16,11 +19,8 @@ import (
 var view embed.FS
 
 func main() {
-	fmt.Println("server start.")
-
 	// 環境変数読み込み
-	port := os.Getenv("SERVERPORT")        // ポート番号
-	sessionKey := os.Getenv("SESSION_KEY") // セッションキー
+	dbms, username, userpass, protocol, dbname, port, sessionKey := loadEnv()
 
 	// アクセスログ出力用ファイル読み込み
 	f, err := os.OpenFile("log/access.log", os.O_APPEND|os.O_WRONLY, 0666)
@@ -42,7 +42,36 @@ func main() {
 	// エラーログの出力先をファイルに指定
 	log.SetOutput(io.MultiWriter(os.Stderr, errorfile))
 
+	db.Init(dbms, username, userpass, protocol, dbname)
 	controller.SessionInit(sessionKey)
 	controller.TemplateInit()
-	server.Init(port, view, f) // サーバ起動
+
+	fmt.Println("server start")
+
+	go server.Init(port, view, f) // サーバ起動
+
+	// 終了シグナルをキャッチ
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	s := <-sig
+	fmt.Printf("Signal %s\n", s.String())
+
+	// 終了処理
+	fmt.Println("Shutting down server...")
+	db.Close()
+	fmt.Println("server stop")
+}
+
+func loadEnv() (string, string, string, string, string, string, string) {
+	// Docker-compose.ymlでDocker起動時に設定した環境変数の取得
+	dbms := os.Getenv("DB_DBMS")           // データベースの種類
+	username := os.Getenv("DB_USERNAME")   // データベースのユーザー名
+	userpass := os.Getenv("DB_USERPASS")   // データベースのユーザーのパスワード
+	protocol := os.Getenv("DB_PROTOCOL")   // データベースの使用するプロトコル
+	dbname := os.Getenv("DB_DATABASENAME") // データベース名
+
+	port := os.Getenv("SERVERPORT")        // ポート番号
+	sessionKey := os.Getenv("SESSION_KEY") // セッションキー
+
+	return dbms, username, userpass, protocol, dbname, port, sessionKey
 }
