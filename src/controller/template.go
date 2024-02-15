@@ -9,6 +9,7 @@ var tlogin *template.Template
 var troom *template.Template
 var troomtop *template.Template
 var tsignup *template.Template
+var tusermenu *template.Template
 
 func TemplateInit() {
 	tlogin, err = template.ParseFiles("view/login.html")
@@ -27,6 +28,11 @@ func TemplateInit() {
 		return
 	}
 	tsignup, err = template.ParseFiles("view/signup.html")
+	if err != nil {
+		log.Printf("template.ParseFiles error:%v\n", err)
+		return
+	}
+	tusermenu, err = template.ParseFiles("view/usermenu.html")
 	if err != nil {
 		log.Printf("template.ParseFiles error:%v\n", err)
 		return

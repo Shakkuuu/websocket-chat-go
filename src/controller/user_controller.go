@@ -9,6 +9,168 @@ import (
 	"websocket-chat/model"
 )
 
+func UserMenu(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		// セッション読み取り
+		un, err := SessionToGetName(r)
+		if err != nil {
+			log.Printf("SessionToGetName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		user, err := model.GetUserByName(un)
+		if err != nil {
+			log.Printf("GetUserByName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "データベースとの接続に失敗しました。"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		// メッセージをテンプレートに渡す
+		var data entity.Data
+		data.Message = user.Name + "さん、こんにちは。"
+
+		data.Name = user.Name
+
+		err = tusermenu.Execute(w, data)
+		if err != nil {
+			log.Printf("Excute error:%v\n", err)
+			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+			return
+		}
+	default:
+		fmt.Fprintln(w, "Method not allowed")
+		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		// セッション読み取り
+		session, err = store.Get(r, SESSION_NAME)
+		if err != nil {
+			log.Printf("store.Get error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		username := session.Values["username"]
+		if err != nil {
+			log.Printf("Session.Values error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+		un := username.(string)
+
+		var user entity.User
+		// セッションのユーザー取得
+		user, err = model.GetUserByName(un)
+		if err != nil {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "データベースとの接続に失敗しました。"
+
+			err = tusermenu.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		// セッション削除
+		session.Options.MaxAge = -1
+		session.Save(r, w)
+
+		// ユーザーの参加中ルームリストを削除
+		err = model.DeleteParticipatingRoomByUserName(user.Name)
+		if err != nil {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "データベースとの接続に失敗しました。"
+
+			err = tusermenu.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		// ユーザー削除
+		err = model.DeleteUser(user.Name)
+		if err != nil {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "データベースとの接続に失敗しました。"
+
+			err = tusermenu.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		// メッセージをテンプレートに渡す
+		var data entity.Data
+		data.Message = "ユーザーを削除しました。"
+
+		err = tsignup.Execute(w, data)
+		if err != nil {
+			log.Printf("Excute error:%v\n", err)
+			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+			return
+		}
+	default:
+		fmt.Fprintln(w, "Method not allowed")
+		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
+		return
+	}
+}
+
 // Signup処理
 func Signup(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {

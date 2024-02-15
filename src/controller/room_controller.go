@@ -66,38 +66,14 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var user entity.User
-		var check bool
-		// ユーザー一覧取得
-		users, err := model.GetUsers()
+		// セッションのユーザー取得
+		user, err = model.GetUserByName(un)
 		if err != nil {
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
 
 			err = troomtop.Execute(w, data)
-			if err != nil {
-				log.Printf("Excute error:%v\n", err)
-				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
-				return
-			}
-			return
-		}
-
-		// ユーザーリストからセッションと一致するユーザーを持ってくる
-		for _, v := range users {
-			if un == v.Name {
-				user = v
-				check = true
-			}
-		}
-
-		if !check {
-			fmt.Println("セッション問題あり")
-			// メッセージをテンプレートに渡す
-			var data entity.Data
-			data.Message = "再ログインしてください"
-
-			err = tlogin.Execute(w, data)
 			if err != nil {
 				log.Printf("Excute error:%v\n", err)
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -240,38 +216,14 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var user entity.User
-		var check bool
-		// ユーザー一覧取得
-		users, err := model.GetUsers()
+		// セッションのユーザー取得
+		user, err = model.GetUserByName(un)
 		if err != nil {
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
 
 			err = troomtop.Execute(w, data)
-			if err != nil {
-				log.Printf("Excute error:%v\n", err)
-				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
-				return
-			}
-			return
-		}
-
-		// ユーザーリストからセッションと一致するユーザーを持ってくる
-		for _, v := range users {
-			if un == v.Name {
-				user = v
-				check = true
-			}
-		}
-
-		if !check {
-			fmt.Println("セッション問題あり")
-			// メッセージをテンプレートに渡す
-			var data entity.Data
-			data.Message = "再ログインしてください"
-
-			err = tlogin.Execute(w, data)
 			if err != nil {
 				log.Printf("Excute error:%v\n", err)
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -317,7 +269,7 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// ユーザーの参加中ルームリストからも削除
-		err = model.DeleteParticipatingRoom(roomid)
+		err = model.DeleteParticipatingRoomByRoomID(roomid)
 		if err != nil {
 			// メッセージをテンプレートに渡す
 			var data entity.Data
@@ -375,18 +327,11 @@ func HandleConnection(ws *websocket.Conn) {
 	}
 
 	var user entity.User
-	// ユーザー一覧取得
-	users, err := model.GetUsers()
+	// ユーザー取得
+	user, err = model.GetUserByName(msg.Name)
 	if err != nil {
-		log.Printf("GetUsers error: %v", err)
+		log.Printf("GetUserByName error: %v", err)
 		return
-	}
-
-	// ユーザーリストからメッセージのNameと一致するユーザーを持ってくる
-	for _, u := range users {
-		if msg.Name == u.Name {
-			user = u
-		}
 	}
 
 	var check bool = false
@@ -549,26 +494,10 @@ func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var user entity.User
-		var check bool
-		// ユーザー一覧取得
-		users, err := model.GetUsers()
+		// ユーザー取得
+		user, err = model.GetUserByName(un)
 		if err != nil {
-			fmt.Println("データベースとの接続に失敗しました。")
-			http.Error(w, "GetUsers error", http.StatusUnauthorized)
-			return
-		}
-
-		// ユーザーリストからセッションと一致するユーザーを持ってくる
-		for _, v := range users {
-			if un == v.Name {
-				user = v
-				check = true
-			}
-		}
-
-		if !check {
-			fmt.Println("セッション問題あり")
-			http.Error(w, "session is posiible", http.StatusUnauthorized)
+			log.Printf("GetUserByName error: %v", err)
 			return
 		}
 

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/view/icon/favicon.ico" />
+    <link rel="stylesheet" href="/view/style/main.css">
+    <title>UserMenu</title>
+    <script src="/view/script/usermenu.js"></script>
+</head>
+<body>
+<h1>UserMenu</h1>
+
+{{.Message}}
+
+<h2>ユーザー名</h2>
+{{.Name}}
+
+<!-- <h3>パスワード変更</h3> -->
+<h3>ユーザー削除</h3>
+<p><button onclick="deleteUser()">ユーザー削除</button></p>
+
+<p><a href="/logout">ログアウト</a></p>
+<p><a href="/">戻る</a></p>
+
+</body>
+</html>
