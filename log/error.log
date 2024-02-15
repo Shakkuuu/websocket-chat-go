@@ -1,2 +1,6 @@
 2024/02/14 10:28:56 room_controller.go:125: This room was not found
 2024/02/14 10:29:33 room_controller.go:323: EOF error:EOF
+2024/02/15 10:49:41 room_controller.go:329: EOF error:EOF
+2024/02/15 10:56:28 room_controller.go:131: This room was not found
+2024/02/15 10:56:46 room_controller.go:131: This room was not found
+2024/02/15 10:56:57 room_controller.go:339: EOF error:EOF

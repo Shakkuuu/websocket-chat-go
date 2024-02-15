@@ -6,12 +6,8 @@ import (
 	"log"
 	"net/http"
 	"websocket-chat/entity"
+	"websocket-chat/model"
 )
-
-// TODO:dbにしてみる？
-var users = []entity.User{
-	{Name: "匿名", Password: "qawsedrftgyhujikolp"},
-}
 
 // Signup処理
 func Signup(w http.ResponseWriter, r *http.Request) {
@@ -58,6 +54,9 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// ユーザー一覧取得
+		users := model.GetUsers()
+
 		for _, v := range users {
 			if v.Name == username {
 				// メッセージをテンプレートに渡す
@@ -80,7 +79,8 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 			ParticipatingRooms: make(map[*entity.ChatRoom]bool),
 		}
 
-		users = append(users, user)
+		// ユーザー追加
+		model.AddUser(user)
 
 		// メッセージをテンプレートに渡す
 		var data entity.Data
@@ -128,6 +128,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+
+		// ユーザー一覧取得
+		users := model.GetUsers()
+
+		// Room一覧取得
+		rooms := model.GetRooms()
 
 		for _, v := range users {
 			if v.Name == username {
@@ -235,6 +241,9 @@ func RoomUsersList(w http.ResponseWriter, r *http.Request) {
 		var roomuserslist entity.SentRoomUsersList
 
 		roomuserslist.UsersList = append(roomuserslist.UsersList, "匿名")
+
+		// Room一覧取得
+		rooms := model.GetRooms()
 
 		// roomがあるか確認
 		room, exists := rooms[roomid]

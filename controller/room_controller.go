@@ -12,8 +12,6 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-var rooms = make(map[string]*entity.ChatRoom) // 作成された各ルームを格納
-
 var sentmessage = make(chan entity.Message) // 各クライアントに送信するためのメッセージのチャネル
 
 // roomtopページの表示
@@ -30,6 +28,9 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		// POSTされた作成するRoomidをFormから受け取り
 		r.ParseForm()
 		roomid := r.FormValue("create_roomid")
+
+		// Room一覧取得
+		rooms := model.GetRooms()
 
 		_, exists := rooms[roomid]
 		if exists { // roomが既に存在していたら
@@ -66,6 +67,8 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 
 		var user entity.User
 		var check bool
+		// ユーザー一覧取得
+		users := model.GetUsers()
 		// ユーザーリストからセッションと一致するユーザーを持ってくる
 		for _, v := range users {
 			if un == v.Name {
@@ -90,7 +93,7 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Room作成
-		room := model.CreateRoom(roomid, rooms)
+		room := model.CreateRoom(roomid)
 
 		// 参加中のルーム一覧にMasterとして追加
 		user.ParticipatingRooms[room] = true
@@ -119,6 +122,9 @@ func Room(w http.ResponseWriter, r *http.Request) {
 		// クエリ読み取り
 		r.ParseForm()
 		roomid := r.URL.Query().Get("roomid")
+
+		// Room一覧取得
+		rooms := model.GetRooms()
 
 		room, exists := rooms[roomid]
 		if !exists { // 指定した部屋が存在していなかったら
@@ -164,6 +170,9 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		roomid := r.URL.Query().Get("roomid")
 
+		// Room一覧取得
+		rooms := model.GetRooms()
+
 		// roomがあるか確認
 		room, exists := rooms[roomid]
 		if !exists {
@@ -199,6 +208,8 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 
 		var user entity.User
 		var check bool
+		// ユーザー一覧取得
+		users := model.GetUsers()
 		// ユーザーリストからセッションと一致するユーザーを持ってくる
 		for _, v := range users {
 			if un == v.Name {
@@ -242,7 +253,7 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// 部屋削除
-		delete(rooms, roomid)
+		model.DeleteRoom(roomid)
 
 		// メッセージをテンプレートに渡す
 		var data entity.Data
@@ -273,6 +284,9 @@ func HandleConnection(ws *websocket.Conn) {
 		return
 	}
 
+	// Room一覧取得
+	rooms := model.GetRooms()
+
 	// 部屋が存在しているかどうか(なくてもいいかも)
 	room, exists := rooms[msg.RoomID]
 	if !exists {
@@ -281,6 +295,8 @@ func HandleConnection(ws *websocket.Conn) {
 	}
 
 	var user entity.User
+	// ユーザー一覧取得
+	users := model.GetUsers()
 	// ユーザーリストからメッセージのNameと一致するユーザーを持ってくる
 	for _, u := range users {
 		if msg.Name == u.Name {
@@ -340,6 +356,10 @@ func HandleMessages() {
 	for {
 		// sentmessageチャネルからメッセージを受け取る
 		msg := <-sentmessage
+
+		// Room一覧取得
+		rooms := model.GetRooms()
+
 		// 部屋が存在しているかどうか
 		room, exists := rooms[msg.RoomID]
 		if !exists {
@@ -375,6 +395,9 @@ func RoomsList(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		var roomslist entity.SentRoomsList
+
+		// Room一覧取得
+		rooms := model.GetRooms()
 
 		// Roomを格納
 		for room := range rooms {
@@ -425,6 +448,8 @@ func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
 
 		var user entity.User
 		var check bool
+		// ユーザー一覧取得
+		users := model.GetUsers()
 		// ユーザーリストからセッションと一致するユーザーを持ってくる
 		for _, v := range users {
 			if un == v.Name {
