@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  app:
+    container_name: shakku-websocket-chat-app
+    build: ./src
+    tty: true
+    volumes:
+      - ./src:/src
+    ports:
+      - 8000:8000
+    environment:
+      DB_PMA_HOST: ${SWC_DB_PMA_HOST}
+      DB_PROTOCOL: ${SWC_DB_PROTOCOL}
+      DB_USERNAME: ${SWC_USERNAME}
+      DB_USERPASS: ${SWC_USERPASS}
+      DB_DATABASE: ${SWC_DATABASE}
+      DB_ROOTPASS: ${SWC_ROOTPASS}
+      SESSION_KEY: ${SESSION_KEY}
+      SERVERPORT: ${SERVERPORT}
+#     depends_on:
+#       - "db"
+#   db:
+#     container_name: shakku-websocket-chat-db
+#     image: mysql:8.0
+#     environment:
+#       MYSQL_ROOT_PASSWORD: ${SWC_ROOTPASS}
+#       MYSQL_DATABASE: ${SWC_DATABASE}
+#       MYSQL_USER: ${SWC_USERNAME}
+#       MYSQL_PASSWORD: ${SWC_USERPASS}
+#       MYSQL_TCP_PORT: 3306
+#       TZ: 'Asia/Tokyo'
+#     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+#     volumes:
+#       - mysql-data:/var/lib/mysql
+#       - ./db/my.cnf:/etc/mysql/conf.d/my.cnf
+#     ports:
+#       - 3306:3306
+#     expose:
+#       - 3306
+#     tty: true
+#     restart: always
+
+# volumes:
+#   mysql-data:
+#     driver: local

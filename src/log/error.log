@@ -4,3 +4,4 @@
 2024/02/15 10:56:28 room_controller.go:131: This room was not found
 2024/02/15 10:56:46 room_controller.go:131: This room was not found
 2024/02/15 10:56:57 room_controller.go:339: EOF error:EOF
+2024/02/15 03:02:00 room_controller.go:339: EOF error:EOF

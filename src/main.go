@@ -2,13 +2,12 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"websocket-chat/controller"
 	"websocket-chat/server"
-
-	"github.com/joho/godotenv"
 )
 
 // view以下の静的ファイルを変数に格納
@@ -16,16 +15,10 @@ import (
 //go:embed view/*
 var view embed.FS
 
-var err error
-
 func main() {
-	// 環境変数読み込み
-	err = godotenv.Load("shakku-websocket-chat.env")
-	if err != nil {
-		log.Printf("godotenv.Load error:%v\n", err)
-		os.Exit(1)
-	}
+	fmt.Println("server start.")
 
+	// 環境変数読み込み
 	port := os.Getenv("SERVERPORT")        // ポート番号
 	sessionKey := os.Getenv("SESSION_KEY") // セッションキー
 
