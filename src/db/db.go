@@ -6,8 +6,8 @@ import (
 	"time"
 	"websocket-chat/entity"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+	_ "github.com/lib/pq"
 )
 
 var (
