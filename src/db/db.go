@@ -51,9 +51,7 @@ func Init(host, user, password, database string) {
 	}
 	autoMigration()
 
-	var p entity.ParticipatingRoom
-
-	db.Delete(&p)
+	db.Exec("DELETE FROM participating_rooms")
 
 	var u entity.User
 
