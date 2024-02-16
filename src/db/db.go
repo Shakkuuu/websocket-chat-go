@@ -17,7 +17,7 @@ var (
 )
 
 // データベースと接続
-func Init(connect string) {
+func Init(host, user, password, database string) {
 	// DBMS := dbms         // データベースの種類
 	// USER := username     // ユーザー名
 	// PASS := userpass     // パスワード
@@ -25,8 +25,8 @@ func Init(connect string) {
 	// DBNAME := dbname     // データベース名
 
 	// CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME + "?charset=utf8&parseTime=true&loc=Asia%2FTokyo"
+	CONNECT := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Shanghai", host, user, password, database)
 
-	CONNECT := connect
 	fmt.Println(CONNECT)
 	fmt.Println("DB接続開始")
 	// 接続できるまで一定回数リトライ
