@@ -43,12 +43,9 @@ func Init(host, user, password, database string) {
 	}
 	autoMigration()
 
-	// db.Exec("DELETE FROM participating_rooms")
-
 	var u entity.User
 
 	db.Where("name = ?", "匿名").Delete(&u)
-	db.Where("name = ?", "shakku").Delete(&u)
 
 	insertTokumei()
 	fmt.Println("DB接続完了")

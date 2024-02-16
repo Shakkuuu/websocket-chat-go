@@ -32,23 +32,28 @@ func GetRooms() map[string]*entity.ChatRoom {
 }
 
 // Room作成
-func CreateRoom(roomid string) (*entity.ChatRoom, error) {
-	db := db.GetDB()
-	var r entity.DBRoom
-	r.RoomID = roomid
-
-	err := db.Create(&r).Error
-	if err != nil {
-		return nil, err
-	}
-
+func CreateRoom(roomid string) *entity.ChatRoom {
 	room := &entity.ChatRoom{
 		ID:      roomid,
 		Clients: make(map[*websocket.Conn]string),
 	}
 	rooms[roomid] = room
 
-	return room, nil
+	return room
+}
+
+// Room作成(db)
+func DBCreateRoom(roomid string) error {
+	db := db.GetDB()
+	var r entity.DBRoom
+	r.RoomID = roomid
+
+	err := db.Create(&r).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Room削除

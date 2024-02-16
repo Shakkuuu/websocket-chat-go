@@ -100,9 +100,9 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Room作成
-		room, err := model.CreateRoom(roomid)
+		err = model.DBCreateRoom(roomid)
 		if err != nil {
-			log.Printf("model.CreateRoom error: %v", err)
+			log.Printf("model.DBCreateRoom error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -115,6 +115,7 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+		room := model.CreateRoom(roomid)
 
 		// 参加中のルーム一覧にMasterとして追加
 		var proom entity.ParticipatingRoom
