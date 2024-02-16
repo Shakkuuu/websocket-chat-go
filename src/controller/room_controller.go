@@ -150,6 +150,8 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 			return
 		}
+	case http.MethodHead:
+		fmt.Fprintln(w, "Thank you monitor.")
 	default:
 		fmt.Fprintln(w, "Method not allowed")
 		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
