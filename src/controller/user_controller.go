@@ -2,11 +2,14 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"websocket-chat/entity"
 	"websocket-chat/model"
+
+	"gorm.io/gorm"
 )
 
 func UserMenu(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +33,20 @@ func UserMenu(w http.ResponseWriter, r *http.Request) {
 		}
 
 		user, err := model.GetUserByName(un)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("model.GetUserByName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "ユーザーが見つかりませんでした。"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
 		if err != nil {
 			log.Printf("GetUserByName error: %v", err)
 			// メッセージをテンプレートに渡す
@@ -104,7 +121,22 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		var user entity.User
 		// セッションのユーザー取得
 		user, err = model.GetUserByName(un)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("model.GetUserByName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "ユーザーが見つかりませんでした。"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
 		if err != nil {
+			log.Printf("model.GetUserByName error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -125,6 +157,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		// ユーザーの参加中ルームリストを削除
 		err = model.DeleteParticipatingRoomByUserName(user.Name)
 		if err != nil {
+			log.Printf("model.DeleteParticipatingRoomUserName error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -141,6 +174,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		// ユーザー削除
 		err = model.DeleteUser(user.Name)
 		if err != nil {
+			log.Printf("model.DeleteUser error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -219,6 +253,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		// ユーザー一覧取得
 		users, err := model.GetUsers()
 		if err != nil {
+			log.Printf("model.GetUsers error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -248,14 +283,31 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		hashpass, err := model.HashPass(password)
+		if err != nil {
+			log.Printf("bcrypt.GenerateFromPassword error: %v\n", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "パスワードのハッシュに失敗しました。"
+
+			err = tsignup.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
 		user := entity.User{
 			Name:     username,
-			Password: password,
+			Password: hashpass,
 		}
 
 		// ユーザー追加
 		err = model.AddUser(&user)
 		if err != nil {
+			log.Printf("model.AddUser error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -316,9 +368,25 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// ユーザー一覧取得
-		users, err := model.GetUsers()
+		var user entity.User
+		// 登録されているユーザー取得
+		user, err = model.GetUserByName(username)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("model.GetUserByName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "ユーザーが見つかりませんでした。"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
 		if err != nil {
+			log.Printf("model.GetUserByName error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -335,52 +403,38 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		// Room一覧取得
 		rooms := model.GetRooms()
 
-		for _, v := range users {
-			if v.Name == username {
-				if v.Password == password {
-					// Room一覧とメッセージをテンプレートに渡す
-					var data entity.Data
-					for k := range rooms {
-						data.Rooms = append(data.Rooms, k)
-					}
-
-					data.Message = "ログインに成功しました。"
-
-					session, _ = store.Get(r, SESSION_NAME)
-					session.Values["username"] = username
-					session.Save(r, w)
-
-					err = troomtop.Execute(w, data)
-					if err != nil {
-						log.Printf("Excute error:%v\n", err)
-						http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
-						return
-					}
-					return
-				} else {
-					// メッセージをテンプレートに渡す
-					var data entity.Data
-					data.Message = "パスワードが違います"
-
-					err = tlogin.Execute(w, data)
-					if err != nil {
-						log.Printf("Excute error:%v\n", err)
-						http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
-						return
-					}
-					return
-				}
+		err = model.HashPassCheck(user.Password, password)
+		if err == nil {
+			// Room一覧とメッセージをテンプレートに渡す
+			var data entity.Data
+			for k := range rooms {
+				data.Rooms = append(data.Rooms, k)
 			}
-		}
 
-		// メッセージをテンプレートに渡す
-		var data entity.Data
-		data.Message = "ユーザーが存在しませんでした。"
+			data.Message = "ログインに成功しました。"
 
-		err = tlogin.Execute(w, data)
-		if err != nil {
-			log.Printf("Excute error:%v\n", err)
-			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+			session, _ = store.Get(r, SESSION_NAME)
+			session.Values["username"] = username
+			session.Save(r, w)
+
+			err = troomtop.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		} else {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "パスワードが違います"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
 			return
 		}
 	default:
@@ -397,6 +451,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		// セッション確認
 		session, err = store.Get(r, SESSION_NAME)
 		if err != nil {
+			log.Printf("store.Get error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -486,13 +541,13 @@ func GetUserName(w http.ResponseWriter, r *http.Request) {
 		// セッション読み取り
 		un, err := SessionToGetName(r)
 		if err != nil {
+			log.Printf("SessionToGetName error: %v", err)
 			log.Println("セッションが見つかりませんでした")
 			http.Error(w, "セッションが見つかりませんでした", http.StatusNotFound)
 			return
 		}
 
 		sentuser.Name = un
-		log.Printf("%v\n", sentuser.Name)
 
 		// jsonに変換
 		sentjson, err := json.Marshal(sentuser)

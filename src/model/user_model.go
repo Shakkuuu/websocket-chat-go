@@ -1,8 +1,11 @@
 package model
 
 import (
+	"log"
 	"websocket-chat/db"
 	"websocket-chat/entity"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // ユーザー一覧取得
@@ -40,6 +43,25 @@ func AddUser(u *entity.User) error {
 		return err
 	}
 
+	return nil
+}
+
+func HashPass(password string) (string, error) {
+	hp, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	hashpass := string(hp)
+	return hashpass, nil
+}
+
+func HashPassCheck(hashpass, password string) error {
+	// ハッシュ化されたパスワードの解読と一致確認
+	err := bcrypt.CompareHashAndPassword([]byte(hashpass), []byte(password))
+	if err != nil {
+		log.Printf("error bcrypt.CompareHashAndPassword: %v\n", err)
+		return err
+	}
 	return nil
 }
 

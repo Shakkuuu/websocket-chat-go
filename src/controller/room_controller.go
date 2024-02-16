@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"websocket-chat/model"
 
 	"golang.org/x/net/websocket"
+	"gorm.io/gorm"
 )
 
 var sentmessage = make(chan entity.Message) // 各クライアントに送信するためのメッセージのチャネル
@@ -68,7 +70,22 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		var user entity.User
 		// セッションのユーザー取得
 		user, err = model.GetUserByName(un)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("model.GetUserByName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "ユーザーが見つかりませんでした。"
+
+			err = troomtop.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
 		if err != nil {
+			log.Printf("model.GetUserByName error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -94,6 +111,7 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		}
 		err = model.AddParticipatingRoom(&proom)
 		if err != nil {
+			log.Printf("model.AddParticipatingRoom error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -218,7 +236,22 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		var user entity.User
 		// セッションのユーザー取得
 		user, err = model.GetUserByName(un)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("model.GetUserByName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "ユーザーが見つかりませんでした。"
+
+			err = troomtop.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
 		if err != nil {
+			log.Printf("model.GetUserByName error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -235,6 +268,7 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		var proom entity.ParticipatingRoom
 		prooms, err := model.GetParticipatingRoom(user.Name)
 		if err != nil {
+			log.Printf("model.GetParticipatingRoom error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -271,6 +305,7 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		// ユーザーの参加中ルームリストからも削除
 		err = model.DeleteParticipatingRoomByRoomID(roomid)
 		if err != nil {
+			log.Printf("model.DeleteParticipatingRoomByRoomID error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -329,7 +364,13 @@ func HandleConnection(ws *websocket.Conn) {
 	var user entity.User
 	// ユーザー取得
 	user, err = model.GetUserByName(msg.Name)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Printf("model.GetUserByName error: %v", err)
+		log.Printf("User Not Found: %v", err)
+		return
+	}
 	if err != nil {
+		log.Printf("model.GetUserByName error: %v", err)
 		log.Printf("GetUserByName error: %v", err)
 		return
 	}
@@ -496,6 +537,11 @@ func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
 		var user entity.User
 		// ユーザー取得
 		user, err = model.GetUserByName(un)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("model.GetUserByName error: %v", err)
+			log.Printf("User Not Found: %v", err)
+			return
+		}
 		if err != nil {
 			log.Printf("GetUserByName error: %v", err)
 			return
