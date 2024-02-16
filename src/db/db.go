@@ -51,6 +51,14 @@ func Init(host, user, password, database string) {
 	}
 	autoMigration()
 
+	var p entity.ParticipatingRoom
+
+	db.Delete(&p)
+
+	var u entity.User
+
+	db.Where("name = ?", "匿名").Delete(&u)
+
 	insertTokumei()
 	fmt.Println("DB接続完了")
 }
@@ -62,9 +70,9 @@ func GetDB() *gorm.DB {
 
 // サーバ終了時にデータベースとの接続終了
 func Close() {
-	var p entity.ParticipatingRoom
+	// var p entity.ParticipatingRoom
 
-	db.Delete(&p)
+	// db.Delete(&p)
 
 	if sqlDB, err := db.DB(); err != nil {
 		log.Printf("db Close error: %v\n", err)

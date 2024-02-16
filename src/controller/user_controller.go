@@ -492,6 +492,7 @@ func GetUserName(w http.ResponseWriter, r *http.Request) {
 		}
 
 		sentuser.Name = un
+		log.Printf("%v\n", sentuser.Name)
 
 		// jsonに変換
 		sentjson, err := json.Marshal(sentuser)

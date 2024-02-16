@@ -13,7 +13,7 @@ window.onload = function () {
     .then(data => {
         const username = data.name;
 
-        console.log(username);
+        console.log("username:", username);
 
         Name = username;
 
