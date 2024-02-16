@@ -48,6 +48,7 @@ func Init(host, user, password, database string) {
 	var u entity.User
 
 	db.Where("name = ?", "匿名").Delete(&u)
+	db.Where("name = ?", "shakku").Delete(&u)
 
 	insertTokumei()
 	fmt.Println("DB接続完了")

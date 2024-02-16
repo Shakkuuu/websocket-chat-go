@@ -217,9 +217,9 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 		checkpass := r.FormValue("checkpassword")
 
 		// セッション読み取り
-		un, err := SessionToGetName(r)
+		session, err = store.Get(r, SESSION_NAME)
 		if err != nil {
-			log.Printf("SessionToGetName error: %v", err)
+			log.Printf("store.Get error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -233,7 +233,26 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		user, err := model.GetUserByName(un)
+		username := session.Values["username"]
+		if err != nil {
+			log.Printf("Session.Values error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+		un := username.(string)
+
+		var user entity.User
+		// セッションのユーザー取得
+		user, err = model.GetUserByName(un)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Printf("model.GetUserByName error: %v", err)
 			// メッセージをテンプレートに渡す
@@ -249,12 +268,12 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err != nil {
-			log.Printf("GetUserByName error: %v", err)
+			log.Printf("model.GetUserByName error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
 
-			err = tlogin.Execute(w, data)
+			err = tusermenu.Execute(w, data)
 			if err != nil {
 				log.Printf("Excute error:%v\n", err)
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
@@ -291,7 +310,7 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		model.HashPassCheck(user.Password, oldpassword)
+		err = model.HashPassCheck(user.Password, oldpassword)
 		if err != nil {
 			// メッセージをテンプレートに渡す
 			var data entity.Data
@@ -343,6 +362,10 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+
+		// 再ログイン用に一度セッション削除
+		session.Options.MaxAge = -1
+		session.Save(r, w)
 
 		// メッセージをテンプレートに渡す
 		var data entity.Data
