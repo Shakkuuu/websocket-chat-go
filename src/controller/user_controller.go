@@ -486,17 +486,8 @@ func GetUserName(w http.ResponseWriter, r *http.Request) {
 		// セッション読み取り
 		un, err := SessionToGetName(r)
 		if err != nil {
-			log.Printf("SessionToGetName error: %v", err)
-			// メッセージをテンプレートに渡す
-			var data entity.Data
-			data.Message = "再ログインしてください"
-
-			err = tlogin.Execute(w, data)
-			if err != nil {
-				log.Printf("Excute error:%v\n", err)
-				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
-				return
-			}
+			log.Println("セッションが見つかりませんでした")
+			http.Error(w, "セッションが見つかりませんでした", http.StatusNotFound)
 			return
 		}
 
