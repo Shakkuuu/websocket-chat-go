@@ -79,6 +79,7 @@ func Close() {
 func autoMigration() {
 	db.AutoMigrate(&entity.User{})
 	db.AutoMigrate(&entity.ParticipatingRoom{})
+	db.AutoMigrate(&entity.DBRoom{})
 }
 
 // 匿名ユーザーを初期に追加

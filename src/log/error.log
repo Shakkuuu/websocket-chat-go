@@ -1,7 +1,0 @@
-2024/02/15 23:54:45 db.go:89: db.Create tokumei error: Error 1062 (23000): Duplicate entry '匿名' for key 'users.name'
-2024/02/15 23:54:45 db.go:91: 匿名ユーザーが登録されました。
-2024/02/15 23:55:32 room_controller.go:500: GetUserByName error: record not found
-2024/02/15 23:55:41 room_controller.go:140: This room was not found
-2024/02/15 23:56:29 room_controller.go:140: This room was not found
-2024/02/15 23:56:42 room_controller.go:386: EOF error:EOF
-2024/02/15 23:57:03 room_controller.go:482: SessionToGetName error: セッションなし

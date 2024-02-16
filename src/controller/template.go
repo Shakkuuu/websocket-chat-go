@@ -11,30 +11,31 @@ var troomtop *template.Template
 var tsignup *template.Template
 var tusermenu *template.Template
 
-func TemplateInit() {
+func TemplateInit() error {
 	tlogin, err = template.ParseFiles("view/login.html")
 	if err != nil {
 		log.Printf("template.ParseFiles error:%v\n", err)
-		return
+		return err
 	}
 	troom, err = template.ParseFiles("view/room.html")
 	if err != nil {
 		log.Printf("template.ParseFiles error:%v\n", err)
-		return
+		return err
 	}
 	troomtop, err = template.ParseFiles("view/roomtop.html")
 	if err != nil {
 		log.Printf("template.ParseFiles error:%v\n", err)
-		return
+		return err
 	}
 	tsignup, err = template.ParseFiles("view/signup.html")
 	if err != nil {
 		log.Printf("template.ParseFiles error:%v\n", err)
-		return
+		return err
 	}
 	tusermenu, err = template.ParseFiles("view/usermenu.html")
 	if err != nil {
 		log.Printf("template.ParseFiles error:%v\n", err)
-		return
+		return err
 	}
+	return nil
 }

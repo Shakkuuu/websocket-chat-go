@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -10,7 +11,10 @@ import (
 	"syscall"
 	"websocket-chat/controller"
 	"websocket-chat/db"
+	"websocket-chat/model"
 	"websocket-chat/server"
+
+	"gorm.io/gorm"
 )
 
 // view以下の静的ファイルを変数に格納
@@ -44,7 +48,19 @@ func main() {
 
 	db.Init(host, user, password, database)
 	controller.SessionInit(sessionKey)
-	controller.TemplateInit()
+	err = controller.TemplateInit()
+	if err != nil {
+		log.Printf("TemplateInit error:%v\n", err)
+		os.Exit(1)
+	}
+	err = model.RoomInit()
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Println("Roomが空の初期状態です。")
+	}
+	if err != nil {
+		log.Printf("RoomInit error:%v\n", err)
+		os.Exit(1)
+	}
 
 	fmt.Println("server start")
 

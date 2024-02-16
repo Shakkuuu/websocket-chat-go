@@ -49,9 +49,16 @@ type User struct {
 	Password string
 }
 
+// ユーザーの参加中Room情報
 type ParticipatingRoom struct {
 	ID       int `gorm:"unique"`
 	RoomID   string
 	IsMaster bool
 	UserName string
+}
+
+// DB保存用Room
+type DBRoom struct {
+	ID     int    `gorm:"unique"`
+	RoomID string `gorm:"unique"`
 }
