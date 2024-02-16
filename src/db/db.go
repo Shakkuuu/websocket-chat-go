@@ -6,8 +6,8 @@ import (
 	"time"
 	"websocket-chat/entity"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var (
@@ -17,19 +17,21 @@ var (
 )
 
 // データベースと接続
-func Init(dbms, username, userpass, protocol, dbname string) {
-	DBMS := dbms         // データベースの種類
-	USER := username     // ユーザー名
-	PASS := userpass     // パスワード
-	PROTOCOL := protocol // 3306ポート
-	DBNAME := dbname     // データベース名
+func Init(connect string) {
+	// DBMS := dbms         // データベースの種類
+	// USER := username     // ユーザー名
+	// PASS := userpass     // パスワード
+	// PROTOCOL := protocol // 3306ポート
+	// DBNAME := dbname     // データベース名
 
-	CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME + "?charset=utf8&parseTime=true&loc=Asia%2FTokyo"
+	// CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME + "?charset=utf8&parseTime=true&loc=Asia%2FTokyo"
 
+	CONNECT := connect
+	fmt.Println(CONNECT)
 	fmt.Println("DB接続開始")
 	// 接続できるまで一定回数リトライ
 	count := 0
-	db, err = gorm.Open(DBMS, CONNECT)
+	db, err = gorm.Open(postgres.Open(CONNECT), &gorm.Config{})
 	if err != nil {
 		for {
 			if err == nil {
@@ -44,7 +46,7 @@ func Init(dbms, username, userpass, protocol, dbname string) {
 				log.Printf("db Init error: %v\n", err)
 				panic(err)
 			}
-			db, err = gorm.Open(DBMS, CONNECT)
+			db, err = gorm.Open(postgres.Open(CONNECT), &gorm.Config{})
 		}
 	}
 	autoMigration()
@@ -64,10 +66,19 @@ func Close() {
 
 	db.Delete(&p)
 
-	if err := db.Close(); err != nil {
+	if sqlDB, err := db.DB(); err != nil {
 		log.Printf("db Close error: %v\n", err)
 		panic(err)
+	} else {
+		if err := sqlDB.Close(); err != nil {
+			log.Printf("db Close error: %v\n", err)
+			panic(err)
+		}
 	}
+	// if err := db.Close(); err != nil {
+	// 	log.Printf("db Close error: %v\n", err)
+	// 	panic(err)
+	// }
 }
 
 // entityを参照してテーブル作成　マイグレーション
