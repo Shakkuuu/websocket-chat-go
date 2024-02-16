@@ -100,7 +100,21 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Room作成
-		room := model.CreateRoom(roomid)
+		room, err := model.CreateRoom(roomid)
+		if err != nil {
+			log.Printf("model.CreateRoom error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "データベースとの接続に失敗しました。"
+
+			err = troomtop.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
 
 		// 参加中のルーム一覧にMasterとして追加
 		var proom entity.ParticipatingRoom
@@ -320,7 +334,21 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// 部屋削除
-		model.DeleteRoom(roomid)
+		err = model.DeleteRoom(roomid)
+		if err != nil {
+			log.Printf("model.DeleteRoom error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "データベースとの接続に失敗しました。"
+
+			err = troomtop.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
 
 		// メッセージをテンプレートに渡す
 		var data entity.Data

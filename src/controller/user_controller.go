@@ -212,6 +212,7 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		r.ParseForm()
+		oldpassword := r.FormValue("oldpassword")
 		password := r.FormValue("password")
 		checkpass := r.FormValue("checkpassword")
 
@@ -262,7 +263,7 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if password == "" || checkpass == "" {
+		if oldpassword == "" || password == "" || checkpass == "" {
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "入力されていない項目があります。"
@@ -290,6 +291,20 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		model.HashPassCheck(user.Password, oldpassword)
+		if err != nil {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "現在のパスワードが違います"
+
+			err = tusermenu.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
 		hashpass, err := model.HashPass(password)
 		if err != nil {
 			log.Printf("bcrypt.GenerateFromPassword error: %v\n", err)

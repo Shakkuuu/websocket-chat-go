@@ -46,6 +46,7 @@ func AddUser(u *entity.User) error {
 	return nil
 }
 
+// パスワードのハッシュ化
 func HashPass(password string) (string, error) {
 	hp, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -55,6 +56,7 @@ func HashPass(password string) (string, error) {
 	return hashpass, nil
 }
 
+// ハッシュ化されたパスワードの一致確認
 func HashPassCheck(hashpass, password string) error {
 	// ハッシュ化されたパスワードの解読と一致確認
 	err := bcrypt.CompareHashAndPassword([]byte(hashpass), []byte(password))
@@ -69,7 +71,7 @@ func HashPassCheck(hashpass, password string) error {
 func PutUserByName(u *entity.User, username string) error {
 	db := db.GetDB()
 
-	err := db.Where("username = ?", username).Model(&u).Updates(&u).Error
+	err := db.Where("name = ?", username).Model(&u).Updates(&u).Error
 	if err != nil {
 		return err
 	}

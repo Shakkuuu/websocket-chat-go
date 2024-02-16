@@ -43,7 +43,7 @@ func Init(host, user, password, database string) {
 	}
 	autoMigration()
 
-	db.Exec("DELETE FROM participating_rooms")
+	// db.Exec("DELETE FROM participating_rooms")
 
 	var u entity.User
 
