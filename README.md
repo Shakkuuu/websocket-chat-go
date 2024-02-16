@@ -15,9 +15,7 @@ SESSION_KEY="hogefuga"
 
 - 見た目
 - コードまとめる
-- Room一覧をdbに保存(mysql)
 - サーバーを安全に終了Graceful shutdown (Dockerfileでgo run main.goのコマンドを実行させずに、コンテナに入って実行しないと、docker-composeを終了時にコンテナ自体が終了されてしまい、goにシグナルがうまく飛ばされない)
-- パスワード変更
 - チャットログをlogファイルに残す(サーバー名、ユーザー名、宛先、メッセージ、日時を入れる)
 - htmlで入力必須かつpattern入れているが、サーバー側でも実装する費用があるのか
 
@@ -38,6 +36,8 @@ SESSION_KEY="hogefuga"
 - ログをファイルに出力 ok (log.SetOutput()でログの出力先を変更できた。io.MultiWriter(os.Stderr, errorfile)を使用することで、標準エラー出力とerror.logファイルの両方にエラーログを出力できるようにした。アクセスの方はfmt.Fprintで出力)
 - ユーザー一覧をdbに保存(mysql) ok
 - ユーザー削除 ok
+- Room一覧をdbに保存(mysql) ok
+- パスワード変更 ok
 
 - 人がいなくなったら自動削除？ no
 - クライアントがわのName消せるかもそれでサーバー側のSessionのみでName管理 wsの時につまる

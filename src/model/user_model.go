@@ -66,16 +66,16 @@ func HashPassCheck(hashpass, password string) error {
 }
 
 // Nameからのユーザーデータ更新処理
-// func PutUserByName(u *entity.User, username string) error {
-// 	db := db.GetDB()
+func PutUserByName(u *entity.User, username string) error {
+	db := db.GetDB()
 
-// 	err := db.Where("username = ?", username).Model(&u).Updates(&u).Error
-// 	if err != nil {
-// 		return err
-// 	}
+	err := db.Where("username = ?", username).Model(&u).Updates(&u).Error
+	if err != nil {
+		return err
+	}
 
-// 	return nil
-// }
+	return nil
+}
 
 // Nameからのユーザー削除処理
 func DeleteUser(username string) error {

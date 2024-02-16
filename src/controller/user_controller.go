@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// ユーザー情報のページ
 func UserMenu(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -81,6 +82,7 @@ func UserMenu(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ユーザー削除
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -193,6 +195,145 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		data.Message = "ユーザーを削除しました。"
 
 		err = tsignup.Execute(w, data)
+		if err != nil {
+			log.Printf("Excute error:%v\n", err)
+			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+			return
+		}
+	default:
+		fmt.Fprintln(w, "Method not allowed")
+		http.Error(w, "そのメソッドは許可されていません。", http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+// パスワード変更
+func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		r.ParseForm()
+		password := r.FormValue("password")
+		checkpass := r.FormValue("checkpassword")
+
+		// セッション読み取り
+		un, err := SessionToGetName(r)
+		if err != nil {
+			log.Printf("SessionToGetName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "再ログインしてください"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		user, err := model.GetUserByName(un)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("model.GetUserByName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "ユーザーが見つかりませんでした。"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+		if err != nil {
+			log.Printf("GetUserByName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "データベースとの接続に失敗しました。"
+
+			err = tlogin.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		if password == "" || checkpass == "" {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "入力されていない項目があります。"
+
+			err = tusermenu.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		if password != checkpass {
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "確認用再入力パスワードが一致していません。"
+
+			err = tusermenu.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		hashpass, err := model.HashPass(password)
+		if err != nil {
+			log.Printf("bcrypt.GenerateFromPassword error: %v\n", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "パスワードのハッシュに失敗しました。"
+
+			err = tusermenu.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		user = entity.User{
+			ID:       user.ID,
+			Name:     user.Name,
+			Password: hashpass,
+		}
+
+		// ユーザー更新
+		err = model.PutUserByName(&user, un)
+		if err != nil {
+			log.Printf("model.PutUserByName error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "データベースとの接続に失敗しました。"
+
+			err = tusermenu.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		// メッセージをテンプレートに渡す
+		var data entity.Data
+		data.Message = "パスワードを更新しました。再ログインしてください。"
+
+		err = tlogin.Execute(w, data)
 		if err != nil {
 			log.Printf("Excute error:%v\n", err)
 			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)

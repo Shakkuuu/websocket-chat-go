@@ -16,7 +16,19 @@
 <h2>ユーザー名</h2>
 {{.Name}}
 
-<!-- <h3>パスワード変更</h3> -->
+<h3>パスワード変更</h3>
+<form id="passwordform" action="/changepassword" method="POST">
+    <div>
+        <input type="password" id="password" name="password" placeholder="password" autocomplete="off">
+    </div>
+    <div>
+        <input type="password" name="checkpassword" placeholder="checkpassword" autocomplete="off">
+        <p>※パスワードは半角英数字をそれぞれ1種類以上含み、8文字以上100文字以下である必要があります。</p>
+        <p>(以下の記号が使用可能'!@#$%^&*()_+-=')</p>
+    </div>
+    <p><input type="submit" value="登録"></p>
+</form>
+
 <h3>ユーザー削除</h3>
 <p><button onclick="deleteUser()">ユーザー削除</button></p>
 
