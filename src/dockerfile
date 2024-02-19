@@ -12,5 +12,7 @@ COPY ./ ./
 
 EXPOSE 8000
 
+RUN go build -o /shakku-websocket-chat
+
 # 起動コマンド
-CMD ["go", "run", "main.go"]
+CMD ["/shakku-websocket-chat"]
