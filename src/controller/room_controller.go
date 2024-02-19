@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"websocket-chat/entity"
@@ -499,7 +500,8 @@ func HandleMessages() {
 		}
 
 		// チャットログを出力と保存 日時、サーバー名、ユーザー名、宛先、メッセージ
-		chatlog := fmt.Sprintf("%s: [S%s] From(%s) To (%s) Msg(%s)\n", timeToStr(time.Now()), msg.RoomID, msg.Name, msg.ToName, msg.Message)
+		replaceNlMsg := strings.ReplaceAll(msg.Message, "\n", " ") // 改行があるとログが改行されてしまうため、改行を削除
+		chatlog := fmt.Sprintf("%s: [S%s] From(%s) To (%s) Msg(%s)\n", timeToStr(time.Now()), msg.RoomID, msg.Name, msg.ToName, replaceNlMsg)
 		fmt.Print(chatlog)
 		fmt.Fprint(chatlogfile, chatlog)
 
