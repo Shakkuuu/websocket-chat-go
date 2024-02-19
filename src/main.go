@@ -27,14 +27,14 @@ func main() {
 	host, user, password, database, port, sessionKey := loadEnv()
 
 	// アクセスログ出力用ファイル読み込み
-	f, err := os.OpenFile("log/access.log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile("log/access.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Printf("logfile os.OpenFile error:%v\n", err)
 		os.Exit(1)
 	}
 	defer f.Close()
 	// エラーログ出力用ファイル読み込み
-	errorfile, err := os.OpenFile("log/error.log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	errorfile, err := os.OpenFile("log/error.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Printf("logfile os.OpenFile error:%v\n", err)
 		os.Exit(1)
