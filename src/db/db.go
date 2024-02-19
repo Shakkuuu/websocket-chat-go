@@ -17,8 +17,8 @@ var (
 )
 
 // データベースと接続
-func Init(host, user, password, database string) {
-	CONNECT := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Shanghai", host, user, password, database)
+func Init(host, user, password, database, dbport string) {
+	CONNECT := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai", host, user, password, database, dbport)
 
 	fmt.Println("DB接続開始")
 	// 接続できるまで一定回数リトライ

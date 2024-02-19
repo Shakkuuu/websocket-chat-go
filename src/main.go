@@ -24,7 +24,7 @@ var view embed.FS
 
 func main() {
 	// 環境変数読み込み
-	host, user, password, database, port, sessionKey := loadEnv()
+	host, user, password, database, dbport, port, sessionKey := loadEnv()
 
 	// アクセスログ出力用ファイル読み込み
 	f, err := os.OpenFile("log/access.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
@@ -53,7 +53,7 @@ func main() {
 	// エラーログの出力先をファイルに指定
 	log.SetOutput(io.MultiWriter(os.Stderr, errorfile))
 
-	db.Init(host, user, password, database)
+	db.Init(host, user, password, database, dbport)
 	controller.SessionInit(sessionKey)
 	err = controller.TemplateInit()
 	if err != nil {
@@ -87,16 +87,17 @@ func main() {
 	fmt.Println("server stop")
 }
 
-func loadEnv() (string, string, string, string, string, string) {
+func loadEnv() (string, string, string, string, string, string, string) {
 	// Docker-compose.ymlでDocker起動時に設定した環境変数の取得
 	// dbms := os.Getenv("DB_DBMS")           // データベースの種類
 	username := os.Getenv("DB_USERNAME")   // データベースのユーザー名
 	userpass := os.Getenv("DB_USERPASS")   // データベースのユーザーのパスワード
 	protocol := os.Getenv("DB_PROTOCOL")   // データベースの使用するプロトコル
 	dbname := os.Getenv("DB_DATABASENAME") // データベース名
+	dbport := os.Getenv("DB_PORT")         // データベースのポート番号
 
 	port := os.Getenv("SERVERPORT")        // ポート番号
 	sessionKey := os.Getenv("SESSION_KEY") // セッションキー
 
-	return protocol, username, userpass, dbname, port, sessionKey
+	return protocol, username, userpass, dbname, dbport, port, sessionKey
 }

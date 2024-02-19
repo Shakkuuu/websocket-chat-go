@@ -1,4 +1,4 @@
-const wsprotocol = "wss:";
+const wsprotocol = "ws:";
 const protocol = location.protocol;
 const domain = location.hostname;
 const port = location.port;
