@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"time"
 
 	"websocket-chat/entity"
 	"websocket-chat/model"
@@ -15,6 +17,17 @@ import (
 )
 
 var sentmessage = make(chan entity.Message) // 各クライアントに送信するためのメッセージのチャネル
+var chatlogfile *os.File
+
+// mainでOpenしたログファイルを変数に入れる
+func ChatLogInit(f *os.File) {
+	chatlogfile = f
+}
+
+// "YYYY-MM-DD HH-MM-SS"に変換
+func timeToStr(t time.Time) string {
+	return t.Format("2006-01-02 15:04:05")
+}
 
 // roomtopページの表示
 func RoomTop(w http.ResponseWriter, r *http.Request) {
@@ -484,6 +497,11 @@ func HandleMessages() {
 		if !exists {
 			continue
 		}
+
+		// チャットログを出力と保存 日時、サーバー名、ユーザー名、宛先、メッセージ
+		chatlog := fmt.Sprintf("%s: [S%s] From(%s) To (%s) Msg(%s)\n", timeToStr(time.Now()), msg.RoomID, msg.Name, msg.ToName, msg.Message)
+		fmt.Print(chatlog)
+		fmt.Fprint(chatlogfile, chatlog)
 
 		if msg.ToName != "" {
 			// 接続中のクライアントにメッセージを送る

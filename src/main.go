@@ -40,6 +40,13 @@ func main() {
 		os.Exit(1)
 	}
 	defer errorfile.Close()
+	// Roomログ出力用ファイル読み込み
+	chatfile, err := os.OpenFile("log/room.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		log.Printf("logfile os.OpenFile error:%v\n", err)
+		os.Exit(1)
+	}
+	defer errorfile.Close()
 
 	// ログの先頭に日付時刻とファイル名、行数を表示するように設定
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
@@ -61,6 +68,8 @@ func main() {
 		log.Printf("RoomInit error:%v\n", err)
 		os.Exit(1)
 	}
+
+	controller.ChatLogInit(chatfile)
 
 	fmt.Println("server start")
 

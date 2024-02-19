@@ -14,11 +14,13 @@ var session *sessions.Session
 var store *sessions.CookieStore
 var err error
 
+// セッションの初期化
 func SessionInit(sessionKey string) {
 	store = sessions.NewCookieStore([]byte(sessionKey))
 	session = sessions.NewSession(store, SESSION_NAME)
 }
 
+// セッションからユーザー名を取得
 func SessionToGetName(r *http.Request) (string, error) {
 	// セッション読み取り
 	session, err = store.Get(r, SESSION_NAME)
