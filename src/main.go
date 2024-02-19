@@ -40,8 +40,8 @@ func main() {
 		os.Exit(1)
 	}
 	defer errorfile.Close()
-	// Roomログ出力用ファイル読み込み
-	chatfile, err := os.OpenFile("log/room.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	// chatログ出力用ファイル読み込み
+	chatfile, err := os.OpenFile("log/chat.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Printf("logfile os.OpenFile error:%v\n", err)
 		os.Exit(1)

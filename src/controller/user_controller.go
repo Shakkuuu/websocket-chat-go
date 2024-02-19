@@ -156,6 +156,64 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		session.Options.MaxAge = -1
 		session.Save(r, w)
 
+		// ユーザーが作成したRoomの削除
+		var proom entity.ParticipatingRoom
+		prooms, err := model.GetParticipatingRoom(user.Name)
+		if err != nil {
+			log.Printf("model.GetParticipatingRoom error: %v", err)
+			// メッセージをテンプレートに渡す
+			var data entity.Data
+			data.Message = "データベースとの接続に失敗しました。"
+
+			err = tusermenu.Execute(w, data)
+			if err != nil {
+				log.Printf("Excute error:%v\n", err)
+				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		for _, proom = range prooms {
+			if !proom.IsMaster {
+				continue
+			}
+
+			// ユーザーの参加中ルームリストからも削除
+			err = model.DeleteParticipatingRoomByRoomID(proom.RoomID)
+			if err != nil {
+				log.Printf("model.DeleteParticipatingRoomByRoomID error: %v", err)
+				// メッセージをテンプレートに渡す
+				var data entity.Data
+				data.Message = "データベースとの接続に失敗しました。"
+
+				err = tusermenu.Execute(w, data)
+				if err != nil {
+					log.Printf("Excute error:%v\n", err)
+					http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+					return
+				}
+				return
+			}
+
+			// 部屋削除
+			err = model.DeleteRoom(proom.RoomID)
+			if err != nil {
+				log.Printf("model.DeleteRoom error: %v", err)
+				// メッセージをテンプレートに渡す
+				var data entity.Data
+				data.Message = "データベースとの接続に失敗しました。"
+
+				err = tusermenu.Execute(w, data)
+				if err != nil {
+					log.Printf("Excute error:%v\n", err)
+					http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+					return
+				}
+				return
+			}
+		}
+
 		// ユーザーの参加中ルームリストを削除
 		err = model.DeleteParticipatingRoomByUserName(user.Name)
 		if err != nil {
