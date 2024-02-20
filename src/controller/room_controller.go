@@ -562,57 +562,36 @@ func RoomsList(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// 参加中のRoomの一覧を返す
-func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
+// 参加ユーザーの一覧を返す
+func RoomUsersList(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		var joinroomslist entity.SentRoomsList
+		// クエリ読み取り
+		r.ParseForm()
+		roomid := r.URL.Query().Get("roomid")
 
-		// セッション読み取り
-		un, err := SessionToGetName(r)
-		if err != nil {
-			log.Printf("SessionToGetName error: %v", err)
-			// メッセージをテンプレートに渡す
-			var data entity.Data
-			data.Message = "再ログインしてください"
+		var roomuserslist entity.SentRoomUsersList
 
-			err = tlogin.Execute(w, data)
-			if err != nil {
-				log.Printf("Excute error:%v\n", err)
-				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
-				return
-			}
+		roomuserslist.UsersList = append(roomuserslist.UsersList, "匿名")
+
+		// Room一覧取得
+		rooms := model.GetRooms()
+
+		// roomがあるか確認
+		room, exists := rooms[roomid]
+		if !exists {
+			log.Println("Roomが見つかりませんでした")
+			http.Error(w, "Roomが見つかりませんでした", http.StatusNotFound)
 			return
 		}
 
-		var user entity.User
-		// ユーザー取得
-		user, err = model.GetUserByName(un)
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Printf("model.GetUserByName error: %v", err)
-			log.Printf("User Not Found: %v", err)
-			return
+		// Room内のユーザーを格納
+		for _, user := range room.Clients {
+			roomuserslist.UsersList = append(roomuserslist.UsersList, user)
 		}
-		if err != nil {
-			log.Printf("GetUserByName error: %v", err)
-			return
-		}
-
-		// joinRoomを格納
-		prooms, err := model.GetParticipatingRoom(user.Name)
-		if err != nil {
-			fmt.Println("データベースとの接続に失敗しました。")
-			http.Error(w, "GetParticipatingRoom error", http.StatusUnauthorized)
-			return
-		}
-		for _, proom := range prooms {
-			joinroomslist.RoomsList = append(joinroomslist.RoomsList, proom.RoomID)
-		}
-
-		fmt.Println(joinroomslist.RoomsList)
 
 		// jsonに変換
-		sentjson, err := json.Marshal(joinroomslist)
+		sentjson, err := json.Marshal(roomuserslist)
 		if err != nil {
 			log.Printf("json.Marshal error: %v", err)
 			http.Error(w, "json.Marshal error", http.StatusInternalServerError)

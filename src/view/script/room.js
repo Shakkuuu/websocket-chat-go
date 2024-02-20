@@ -92,7 +92,7 @@ function send() {
 // Room内のユーザーの一覧を取得
 function getUsers() {
     document.getElementById('users').textContent = '';
-    fetch(protocol+"//"+domain+":"+port+"/users?roomid="+roomid)
+    fetch(protocol+"//"+domain+":"+port+"/roomusers?roomid="+roomid)
         .then(response => response.json())
         .then(data => {
             const users = data.userslist;
