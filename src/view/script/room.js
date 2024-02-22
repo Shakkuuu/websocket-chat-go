@@ -56,10 +56,9 @@ function updateMessage(roomID, message, name, toname, aus, ous) {
     document.getElementById('allusers').textContent = '';
     const allusersListElement = document.getElementById("allusers");
     const ausdetails = document.createElement('details');
-    ausdetails.setAttribute("open", "");
     const aussummary = document.createElement('summary');
     const ausul = document.createElement('ul');
-    aussummary.textContent = "";
+    aussummary.textContent = "参加ユーザー 一覧";
     ausdetails.appendChild(aussummary);
     allusers.forEach(user => {
         const listItem = document.createElement('li');
@@ -72,10 +71,9 @@ function updateMessage(roomID, message, name, toname, aus, ous) {
     document.getElementById('onlineusers').textContent = '';
     const onlineusersListElement = document.getElementById("onlineusers");
     const ousdetails = document.createElement('details');
-    ousdetails.setAttribute("open", "");
     const oussummary = document.createElement('summary');
     const ousul = document.createElement('ul');
-    oussummary.textContent = "";
+    oussummary.textContent = "オンラインユーザー 一覧";
     ousdetails.appendChild(oussummary);
     onlineusers.forEach(user => {
         const listItem = document.createElement('li');
