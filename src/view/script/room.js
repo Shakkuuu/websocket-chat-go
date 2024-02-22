@@ -28,7 +28,7 @@ window.onload = function () {
         socket.onmessage = function (event) {
             // サーバーからメッセージを受け取る
             const msg = JSON.parse(event.data);
-            updateMessage(msg.roomID, msg.message, msg.name, msg.toname);
+            updateMessage(msg.roomID, msg.message, msg.name, msg.toname, msg.allusers, msg.onlineusers);
         };
     })
     .catch(error => {
@@ -50,7 +50,25 @@ function joinRoom() {
 }
 
 // メッセージ欄を更新する
-function updateMessage(roomID, message, name, toname) {
+function updateMessage(roomID, message, name, toname, aus, ous) {
+    const allusers = aus;
+    const onlineusers = ous;
+    document.getElementById('allusers').textContent = '';
+    const allusersListElement = document.getElementById("allusers");
+    allusers.forEach(user => {
+        const listItem = document.createElement('li');
+        listItem.textContent = user;
+        allusersListElement.appendChild(listItem);
+    });
+
+    document.getElementById('onlineusers').textContent = '';
+    const onlineusersListElement = document.getElementById("onlineusers");
+    onlineusers.forEach(user => {
+        const listItem = document.createElement('li');
+        listItem.textContent = user;
+        onlineusersListElement.appendChild(listItem);
+    });
+
     let listName = document.createElement("li");
     let nameText = document.createTextNode(roomID + " : " + name + "→" + toname);
     listName.appendChild(nameText);
@@ -87,24 +105,6 @@ function send() {
     const message = { roomID: roomid, message: msg, name : Name, toname : ""};
     socket.send(JSON.stringify(message));
     sendMessage.value = "";
-}
-
-// Room内のユーザーの一覧を取得
-function getUsers() {
-    document.getElementById('users').textContent = '';
-    fetch(protocol+"//"+domain+":"+port+"/roomusers?roomid="+roomid)
-        .then(response => response.json())
-        .then(data => {
-            const users = data.userslist;
-
-            const userListElement = document.getElementById("users");
-            users.forEach(user => {
-                const listItem = document.createElement('li');
-                listItem.textContent = user;
-                userListElement.appendChild(listItem);
-            });
-        })
-        .catch(error => console.error('Error fetching user data:', error));
 }
 
 let typingTimer;

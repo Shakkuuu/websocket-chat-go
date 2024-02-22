@@ -94,11 +94,24 @@ func DeleteUser(username string) error {
 }
 
 // usernameから参加中Room取得
-func GetParticipatingRoom(username string) ([]entity.ParticipatingRoom, error) {
+func GetParticipatingRoomByName(username string) ([]entity.ParticipatingRoom, error) {
 	db := db.GetDB()
 	var p []entity.ParticipatingRoom
 
 	err := db.Where("user_name = ?", username).Find(&p).Error
+	if err != nil {
+		return p, err
+	}
+
+	return p, nil
+}
+
+// roomidから参加中Room取得
+func GetParticipatingRoomByRoomID(roomid string) ([]entity.ParticipatingRoom, error) {
+	db := db.GetDB()
+	var p []entity.ParticipatingRoom
+
+	err := db.Where("room_id = ?", roomid).Find(&p).Error
 	if err != nil {
 		return p, err
 	}

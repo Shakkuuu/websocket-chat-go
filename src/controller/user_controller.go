@@ -158,9 +158,9 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 		// ユーザーが作成したRoomの削除
 		var proom entity.ParticipatingRoom
-		prooms, err := model.GetParticipatingRoom(user.Name)
+		prooms, err := model.GetParticipatingRoomByName(user.Name)
 		if err != nil {
-			log.Printf("model.GetParticipatingRoom error: %v", err)
+			log.Printf("model.GetParticipatingRoomByName error: %v", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -794,10 +794,10 @@ func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// joinRoomを格納
-		prooms, err := model.GetParticipatingRoom(user.Name)
+		prooms, err := model.GetParticipatingRoomByName(user.Name)
 		if err != nil {
 			fmt.Println("データベースとの接続に失敗しました。")
-			http.Error(w, "GetParticipatingRoom error", http.StatusUnauthorized)
+			http.Error(w, "GetParticipatingRoomByName error", http.StatusUnauthorized)
 			return
 		}
 		for _, proom := range prooms {

@@ -50,7 +50,6 @@ func Init(port string, view embed.FS, f *os.File) {
 	http.Handle("/changepassword", loggingMiddleware(http.HandlerFunc(controller.ChangeUserPassword))) // パスワード更新
 	http.Handle("/rooms", loggingMiddleware(http.HandlerFunc(controller.RoomsList)))                   // Room一覧取得
 	http.Handle("/joinrooms", loggingMiddleware(http.HandlerFunc(controller.JoinRoomsList)))           // 参加中のRoom一覧取得
-	http.Handle("/roomusers", loggingMiddleware(http.HandlerFunc(controller.RoomUsersList)))           // Roomに参加しているUser一覧取得
 	http.Handle("/username", loggingMiddleware(http.HandlerFunc(controller.GetUserName)))              // 自身のユーザー名取得
 	http.Handle("/ws", websocket.Handler(controller.HandleConnection))                                 // メッセージWebsocket用
 	go controller.HandleMessages()                                                                     // goroutineとチャネルで常にメッセージを待つ
