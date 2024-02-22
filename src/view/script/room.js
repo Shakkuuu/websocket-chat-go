@@ -36,7 +36,7 @@ window.onload = function () {
         window.location.href = protocol + "//" + domain + ":" + port + '/login';
         return
     });
-};
+}
 
 function joinRoom() {
     let url_string = location.href;
@@ -55,19 +55,35 @@ function updateMessage(roomID, message, name, toname, aus, ous) {
     const onlineusers = ous;
     document.getElementById('allusers').textContent = '';
     const allusersListElement = document.getElementById("allusers");
+    const ausdetails = document.createElement('details');
+    ausdetails.setAttribute("open", "");
+    const aussummary = document.createElement('summary');
+    const ausul = document.createElement('ul');
+    aussummary.textContent = "";
+    ausdetails.appendChild(aussummary);
     allusers.forEach(user => {
         const listItem = document.createElement('li');
         listItem.textContent = user;
-        allusersListElement.appendChild(listItem);
+        ausul.appendChild(listItem);
     });
+    ausdetails.appendChild(ausul);
+    allusersListElement.appendChild(ausdetails);
 
     document.getElementById('onlineusers').textContent = '';
     const onlineusersListElement = document.getElementById("onlineusers");
+    const ousdetails = document.createElement('details');
+    ousdetails.setAttribute("open", "");
+    const oussummary = document.createElement('summary');
+    const ousul = document.createElement('ul');
+    oussummary.textContent = "";
+    ousdetails.appendChild(oussummary);
     onlineusers.forEach(user => {
         const listItem = document.createElement('li');
         listItem.textContent = user;
-        onlineusersListElement.appendChild(listItem);
+        ousul.appendChild(listItem);
     });
+    ousdetails.appendChild(ousul);
+    onlineusersListElement.appendChild(ousdetails);
 
     let listName = document.createElement("li");
     let nameText = document.createTextNode(roomID + " : " + name + "→" + toname);

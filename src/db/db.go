@@ -33,7 +33,7 @@ func Init(host, user, password, database, dbport string) {
 			fmt.Print(".")
 			time.Sleep(time.Second)
 			count++
-			if count > 10 { // countgaが180になるまでリトライ
+			if count > 180 { // countgaが180になるまでリトライ
 				fmt.Println("")
 				log.Printf("db Init error: %v\n", err)
 				panic(err)

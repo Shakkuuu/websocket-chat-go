@@ -3,7 +3,7 @@ body {
 }
 textarea {
     width: 400px;
-    height: 200px;
+    height: 100px;
 }
 input[type="number"] {
     width: 120px;
