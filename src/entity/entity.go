@@ -28,10 +28,10 @@ type Message struct {
 	OnlineUsers []string `json:"onlineusers"`
 }
 
-// Room内のユーザー一覧送信用
-type SentRoomUsersList struct {
-	UsersList []string `json:"userslist"`
-}
+// // Room内のユーザー一覧送信用
+// type SentRoomUsersList struct {
+// 	UsersList []string `json:"userslist"`
+// }
 
 // ルーム一覧送信用
 type SentRoomsList struct {

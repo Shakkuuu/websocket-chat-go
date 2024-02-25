@@ -19,7 +19,7 @@ func UserMenu(w http.ResponseWriter, r *http.Request) {
 		// セッション読み取り
 		un, err := SessionToGetName(r)
 		if err != nil {
-			log.Printf("SessionToGetName error: %v", err)
+			log.Printf("SessionToGetName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -35,7 +35,7 @@ func UserMenu(w http.ResponseWriter, r *http.Request) {
 
 		user, err := model.GetUserByName(un)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Printf("model.GetUserByName error: %v", err)
+			log.Printf("model.GetUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "ユーザーが見つかりませんでした。"
@@ -49,7 +49,7 @@ func UserMenu(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err != nil {
-			log.Printf("GetUserByName error: %v", err)
+			log.Printf("GetUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -89,7 +89,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		// セッション読み取り
 		session, err = store.Get(r, SESSION_NAME)
 		if err != nil {
-			log.Printf("store.Get error: %v", err)
+			log.Printf("store.Get error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -105,7 +105,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 		username := session.Values["username"]
 		if err != nil {
-			log.Printf("Session.Values error: %v", err)
+			log.Printf("Session.Values error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -124,7 +124,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		// セッションのユーザー取得
 		user, err = model.GetUserByName(un)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Printf("model.GetUserByName error: %v", err)
+			log.Printf("model.GetUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "ユーザーが見つかりませんでした。"
@@ -138,7 +138,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err != nil {
-			log.Printf("model.GetUserByName error: %v", err)
+			log.Printf("model.GetUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -160,7 +160,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		var proom entity.ParticipatingRoom
 		prooms, err := model.GetParticipatingRoomByName(user.Name)
 		if err != nil {
-			log.Printf("model.GetParticipatingRoomByName error: %v", err)
+			log.Printf("model.GetParticipatingRoomByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -182,7 +182,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 			// ユーザーの参加中ルームリストからも削除
 			err = model.DeleteParticipatingRoomByRoomID(proom.RoomID)
 			if err != nil {
-				log.Printf("model.DeleteParticipatingRoomByRoomID error: %v", err)
+				log.Printf("model.DeleteParticipatingRoomByRoomID error: %v\n", err)
 				// メッセージをテンプレートに渡す
 				var data entity.Data
 				data.Message = "データベースとの接続に失敗しました。"
@@ -199,7 +199,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 			// 部屋削除
 			err = model.DeleteRoom(proom.RoomID)
 			if err != nil {
-				log.Printf("model.DeleteRoom error: %v", err)
+				log.Printf("model.DeleteRoom error: %v\n", err)
 				// メッセージをテンプレートに渡す
 				var data entity.Data
 				data.Message = "データベースとの接続に失敗しました。"
@@ -217,7 +217,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		// ユーザーの参加中ルームリストを削除
 		err = model.DeleteParticipatingRoomByUserName(user.Name)
 		if err != nil {
-			log.Printf("model.DeleteParticipatingRoomUserName error: %v", err)
+			log.Printf("model.DeleteParticipatingRoomUserName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -234,7 +234,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		// ユーザー削除
 		err = model.DeleteUser(user.Name)
 		if err != nil {
-			log.Printf("model.DeleteUser error: %v", err)
+			log.Printf("model.DeleteUser error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -277,7 +277,7 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 		// セッション読み取り
 		session, err = store.Get(r, SESSION_NAME)
 		if err != nil {
-			log.Printf("store.Get error: %v", err)
+			log.Printf("store.Get error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -293,7 +293,7 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 
 		username := session.Values["username"]
 		if err != nil {
-			log.Printf("Session.Values error: %v", err)
+			log.Printf("Session.Values error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -312,7 +312,7 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 		// セッションのユーザー取得
 		user, err = model.GetUserByName(un)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Printf("model.GetUserByName error: %v", err)
+			log.Printf("model.GetUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "ユーザーが見つかりませんでした。"
@@ -326,7 +326,7 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err != nil {
-			log.Printf("model.GetUserByName error: %v", err)
+			log.Printf("model.GetUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -407,7 +407,7 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 		// ユーザー更新
 		err = model.PutUserByName(&user, un)
 		if err != nil {
-			log.Printf("model.PutUserByName error: %v", err)
+			log.Printf("model.PutUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -490,7 +490,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		// ユーザー一覧取得
 		users, err := model.GetUsers()
 		if err != nil {
-			log.Printf("model.GetUsers error: %v", err)
+			log.Printf("model.GetUsers error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -544,7 +544,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		// ユーザー追加
 		err = model.AddUser(&user)
 		if err != nil {
-			log.Printf("model.AddUser error: %v", err)
+			log.Printf("model.AddUser error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -609,7 +609,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		// 登録されているユーザー取得
 		user, err = model.GetUserByName(username)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Printf("model.GetUserByName error: %v", err)
+			log.Printf("model.GetUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "ユーザーが見つかりませんでした。"
@@ -623,7 +623,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err != nil {
-			log.Printf("model.GetUserByName error: %v", err)
+			log.Printf("model.GetUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -688,7 +688,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		// セッション確認
 		session, err = store.Get(r, SESSION_NAME)
 		if err != nil {
-			log.Printf("store.Get error: %v", err)
+			log.Printf("store.Get error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -731,7 +731,7 @@ func GetUserName(w http.ResponseWriter, r *http.Request) {
 		// セッション読み取り
 		un, err := SessionToGetName(r)
 		if err != nil {
-			log.Printf("SessionToGetName error: %v", err)
+			log.Printf("SessionToGetName error: %v\n", err)
 			log.Println("セッションが見つかりませんでした")
 			http.Error(w, "セッションが見つかりませんでした", http.StatusNotFound)
 			return
@@ -742,7 +742,7 @@ func GetUserName(w http.ResponseWriter, r *http.Request) {
 		// jsonに変換
 		sentjson, err := json.Marshal(sentuser)
 		if err != nil {
-			log.Printf("json.Marshal error: %v", err)
+			log.Printf("json.Marshal error: %v\n", err)
 			http.Error(w, "json.Marshal error", http.StatusInternalServerError)
 			return
 		}
@@ -766,7 +766,7 @@ func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
 		// セッション読み取り
 		un, err := SessionToGetName(r)
 		if err != nil {
-			log.Printf("SessionToGetName error: %v", err)
+			log.Printf("SessionToGetName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -784,12 +784,12 @@ func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
 		// ユーザー取得
 		user, err = model.GetUserByName(un)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Printf("model.GetUserByName error: %v", err)
-			log.Printf("User Not Found: %v", err)
+			log.Printf("model.GetUserByName error: %v\n", err)
+			log.Printf("User Not Found: %v\n", err)
 			return
 		}
 		if err != nil {
-			log.Printf("GetUserByName error: %v", err)
+			log.Printf("GetUserByName error: %v\n", err)
 			return
 		}
 
@@ -809,7 +809,7 @@ func JoinRoomsList(w http.ResponseWriter, r *http.Request) {
 		// jsonに変換
 		sentjson, err := json.Marshal(joinroomslist)
 		if err != nil {
-			log.Printf("json.Marshal error: %v", err)
+			log.Printf("json.Marshal error: %v\n", err)
 			http.Error(w, "json.Marshal error", http.StatusInternalServerError)
 			return
 		}

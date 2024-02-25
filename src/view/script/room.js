@@ -53,35 +53,38 @@ function joinRoom() {
 function updateMessage(roomID, message, name, toname, aus, ous) {
     const allusers = aus;
     const onlineusers = ous;
-    document.getElementById('allusers').textContent = '';
-    const allusersListElement = document.getElementById("allusers");
-    const ausdetails = document.createElement('details');
-    const aussummary = document.createElement('summary');
-    const ausul = document.createElement('ul');
-    aussummary.textContent = "参加ユーザー 一覧";
-    ausdetails.appendChild(aussummary);
-    allusers.forEach(user => {
-        const listItem = document.createElement('li');
-        listItem.textContent = user;
-        ausul.appendChild(listItem);
-    });
-    ausdetails.appendChild(ausul);
-    allusersListElement.appendChild(ausdetails);
 
-    document.getElementById('onlineusers').textContent = '';
-    const onlineusersListElement = document.getElementById("onlineusers");
-    const ousdetails = document.createElement('details');
-    const oussummary = document.createElement('summary');
-    const ousul = document.createElement('ul');
-    oussummary.textContent = "オンラインユーザー 一覧";
-    ousdetails.appendChild(oussummary);
-    onlineusers.forEach(user => {
-        const listItem = document.createElement('li');
-        listItem.textContent = user;
-        ousul.appendChild(listItem);
-    });
-    ousdetails.appendChild(ousul);
-    onlineusersListElement.appendChild(ousdetails);
+    if (allusers != null || onlineusers != null) {
+        document.getElementById('allusers').textContent = '';
+        const allusersListElement = document.getElementById("allusers");
+        const ausdetails = document.createElement('details');
+        const aussummary = document.createElement('summary');
+        const ausul = document.createElement('ul');
+        aussummary.textContent = "参加ユーザー 一覧";
+        ausdetails.appendChild(aussummary);
+        allusers.forEach(user => {
+            const listItem = document.createElement('li');
+            listItem.textContent = user;
+            ausul.appendChild(listItem);
+        });
+        ausdetails.appendChild(ausul);
+        allusersListElement.appendChild(ausdetails);
+
+        document.getElementById('onlineusers').textContent = '';
+        const onlineusersListElement = document.getElementById("onlineusers");
+        const ousdetails = document.createElement('details');
+        const oussummary = document.createElement('summary');
+        const ousul = document.createElement('ul');
+        oussummary.textContent = "オンラインユーザー 一覧";
+        ousdetails.appendChild(oussummary);
+        onlineusers.forEach(user => {
+            const listItem = document.createElement('li');
+            listItem.textContent = user;
+            ousul.appendChild(listItem);
+        });
+        ousdetails.appendChild(ousul);
+        onlineusersListElement.appendChild(ousdetails);
+    };
 
     let listName = document.createElement("li");
     let nameText = document.createTextNode(roomID + " : " + name + "→" + toname);

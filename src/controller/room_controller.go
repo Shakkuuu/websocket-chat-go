@@ -67,7 +67,7 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		// セッション読み取り
 		un, err := SessionToGetName(r)
 		if err != nil {
-			log.Printf("SessionToGetName error: %v", err)
+			log.Printf("SessionToGetName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -85,7 +85,7 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		// セッションのユーザー取得
 		user, err = model.GetUserByName(un)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Printf("model.GetUserByName error: %v", err)
+			log.Printf("model.GetUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "ユーザーが見つかりませんでした。"
@@ -99,7 +99,7 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err != nil {
-			log.Printf("model.GetUserByName error: %v", err)
+			log.Printf("model.GetUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -116,7 +116,7 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		// Room作成
 		err = model.DBCreateRoom(roomid)
 		if err != nil {
-			log.Printf("model.DBCreateRoom error: %v", err)
+			log.Printf("model.DBCreateRoom error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -140,7 +140,7 @@ func RoomTop(w http.ResponseWriter, r *http.Request) {
 		}
 		err = model.AddParticipatingRoom(&proom)
 		if err != nil {
-			log.Printf("model.AddParticipatingRoom error: %v", err)
+			log.Printf("model.AddParticipatingRoom error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -186,7 +186,7 @@ func Room(w http.ResponseWriter, r *http.Request) {
 
 		_, exists := rooms[roomid]
 		if !exists { // 指定した部屋が存在していなかったら
-			log.Printf("This room was not found")
+			log.Println("This room was not found")
 
 			// メッセージをテンプレートに渡す
 			var data entity.Data
@@ -200,12 +200,6 @@ func Room(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
-
-		// // 参加しているユーザー一覧をテンプレートに渡す
-		// var data entity.Data
-		// for _, username := range room.Clients {
-		// 	data.Users = append(data.Users, username)
-		// }
 
 		err = troom.Execute(w, nil)
 		if err != nil {
@@ -250,7 +244,7 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		// セッション読み取り
 		un, err := SessionToGetName(r)
 		if err != nil {
-			log.Printf("SessionToGetName error: %v", err)
+			log.Printf("SessionToGetName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "再ログインしてください"
@@ -268,7 +262,7 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		// セッションのユーザー取得
 		user, err = model.GetUserByName(un)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Printf("model.GetUserByName error: %v", err)
+			log.Printf("model.GetUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "ユーザーが見つかりませんでした。"
@@ -282,7 +276,7 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err != nil {
-			log.Printf("model.GetUserByName error: %v", err)
+			log.Printf("model.GetUserByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -299,7 +293,7 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		var proom entity.ParticipatingRoom
 		prooms, err := model.GetParticipatingRoomByName(user.Name)
 		if err != nil {
-			log.Printf("model.GetParticipatingRoomByName error: %v", err)
+			log.Printf("model.GetParticipatingRoomByName error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -336,7 +330,7 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		// ユーザーの参加中ルームリストからも削除
 		err = model.DeleteParticipatingRoomByRoomID(roomid)
 		if err != nil {
-			log.Printf("model.DeleteParticipatingRoomByRoomID error: %v", err)
+			log.Printf("model.DeleteParticipatingRoomByRoomID error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -353,7 +347,7 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 		// 部屋削除
 		err = model.DeleteRoom(roomid)
 		if err != nil {
-			log.Printf("model.DeleteRoom error: %v", err)
+			log.Printf("model.DeleteRoom error: %v\n", err)
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "データベースとの接続に失敗しました。"
@@ -410,13 +404,13 @@ func HandleConnection(ws *websocket.Conn) {
 	// ユーザー取得
 	user, err = model.GetUserByName(msg.Name)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Printf("model.GetUserByName error: %v", err)
-		log.Printf("User Not Found: %v", err)
+		log.Printf("model.GetUserByName error: %v\n", err)
+		log.Printf("User Not Found: %v\n", err)
 		return
 	}
 	if err != nil {
-		log.Printf("model.GetUserByName error: %v", err)
-		log.Printf("GetUserByName error: %v", err)
+		log.Printf("model.GetUserByName error: %v\n", err)
+		log.Printf("GetUserByName error: %v\n", err)
 		return
 	}
 
@@ -425,7 +419,7 @@ func HandleConnection(ws *websocket.Conn) {
 	var proom entity.ParticipatingRoom
 	prooms, err := model.GetParticipatingRoomByName(user.Name)
 	if err != nil {
-		log.Printf("GetParticipatingRoomByName error: %v", err)
+		log.Printf("GetParticipatingRoomByName error: %v\n", err)
 		return
 	}
 
@@ -444,7 +438,7 @@ func HandleConnection(ws *websocket.Conn) {
 		}
 		err = model.AddParticipatingRoom(&proom)
 		if err != nil {
-			log.Printf("AddParticipatingRoom error: %v", err)
+			log.Printf("AddParticipatingRoom error: %v\n", err)
 			return
 		}
 	}
@@ -453,39 +447,46 @@ func HandleConnection(ws *websocket.Conn) {
 	room.Clients[ws] = msg.Name
 	fmt.Println(room.Clients) // 参加者一覧 デバッグ用
 
-	// オンラインのユーザー取得
-	var onlineusers []string
-
-	onlineusers = append(onlineusers, "匿名")
-
-	// Room一覧再度取得
-	rooms = model.GetRooms()
-
-	// roomがあるか再度確認
-	room, exists = rooms[msg.RoomID]
-	if !exists {
-		log.Printf("This room was not found\n")
-		return
-	}
-
-	// Room内のユーザーを格納
-	for _, user := range room.Clients {
-		onlineusers = append(onlineusers, user)
-	}
-
-	// Roomに参加しているユーザーの取得
+	// 参加しているユーザー一覧とオンラインのユーザー一覧の取得
+	allusersChan := make(chan interface{})
+	onlineusersChan := make(chan interface{})
 	var allusers []string
+	var onlineusers []string
+	go func() {
+		aus, err := model.GetAllUsers(msg.RoomID)
+		if err != nil {
+			err = fmt.Errorf("GetAllUsers error: %v", err)
+			allusersChan <- err
+			return
+		}
+		allusersChan <- aus
+	}()
+	go func() {
+		ous, err := model.GetOnlineUsers(msg.RoomID)
+		if err != nil {
+			err = fmt.Errorf("GetOnlineUsers error: %v", err)
+			allusersChan <- err
+			return
+		}
+		onlineusersChan <- ous
+	}()
 
-	allusers = append(allusers, "匿名")
-	allprooms, err := model.GetParticipatingRoomByRoomID(msg.RoomID)
-	if err != nil {
-		log.Printf("GetParticipatingRoomByRoomID error: %v", err)
+	v1 := <-allusersChan
+	v2 := <-onlineusersChan
+	switch t1 := v1.(type) {
+	case error:
+		log.Println(t1)
 		return
+	case []string:
+		allusers = t1
 	}
 
-	// ユーザーを格納
-	for _, prm := range allprooms {
-		allusers = append(allusers, prm.UserName)
+	switch t2 := v2.(type) {
+	case error:
+		log.Println(t2)
+		return
+	case []string:
+		onlineusers = t2
 	}
 
 	// Roomに参加したことをそのRoomのクライアントにブロードキャスト
@@ -493,7 +494,7 @@ func HandleConnection(ws *websocket.Conn) {
 	sentmessage <- entermsg
 
 	// サーバ側からクライアントにWellcomeメッセージを送信
-	err = websocket.JSON.Send(ws, entity.Message{RoomID: room.ID, Message: "サーバ" + room.ID + "へようこそ", Name: "Server", ToName: "", AllUsers: allusers, OnlineUsers: onlineusers})
+	err = websocket.JSON.Send(ws, entity.Message{RoomID: room.ID, Message: "サーバ" + room.ID + "へようこそ", Name: "Server", ToName: msg.Name, AllUsers: nil, OnlineUsers: nil})
 	if err != nil {
 		log.Printf("server wellcome Send error:%v\n", err)
 	}
@@ -506,39 +507,17 @@ func HandleConnection(ws *websocket.Conn) {
 			if err.Error() == "EOF" { // Roomを退出したことを示すメッセージが来たら
 				log.Printf("EOF error:%v\n", err)
 				delete(room.Clients, ws) // Roomからそのクライアントを削除
-				// オンラインのユーザー取得
-				var onlineusers []string
 
-				onlineusers = append(onlineusers, "匿名")
-
-				// Room一覧再度取得
-				rooms = model.GetRooms()
-
-				// roomがあるか再度確認
-				room, exists = rooms[msg.RoomID]
-				if !exists {
-					log.Printf("This room was not found\n")
-					return
-				}
-
-				// Room内のユーザーを格納
-				for _, user := range room.Clients {
-					onlineusers = append(onlineusers, user)
-				}
-
-				// Roomに参加しているユーザーの取得
-				var allusers []string
-
-				allusers = append(allusers, "匿名")
-				allprooms, err := model.GetParticipatingRoomByRoomID(msg.RoomID)
+				// 参加しているユーザー一覧とオンラインのユーザー一覧の取得
+				allusers, err := model.GetAllUsers(msg.RoomID)
 				if err != nil {
-					log.Printf("GetParticipatingRoomByRoomID error: %v", err)
+					log.Printf("GetAllUsers error: %v\n", err)
 					return
 				}
-
-				// ユーザーを格納
-				for _, prm := range allprooms {
-					allusers = append(allusers, prm.UserName)
+				onlineusers, err := model.GetOnlineUsers(msg.RoomID)
+				if err != nil {
+					log.Printf("GetOnlineUsers error: %v\n", err)
+					return
 				}
 
 				// そのクライアントがRoomから退出したことをそのRoomにブロードキャスト
@@ -564,44 +543,9 @@ func HandleMessages() {
 		rooms := model.GetRooms()
 
 		// 部屋が存在しているかどうか
-		_, exists := rooms[msg.RoomID]
-		if !exists {
-			continue
-		}
-
-		// オンラインのユーザー取得
-		var onlineusers []string
-
-		onlineusers = append(onlineusers, "匿名")
-
-		// Room一覧再度取得
-		rooms = model.GetRooms()
-
-		// roomがあるか再度確認
 		room, exists := rooms[msg.RoomID]
 		if !exists {
-			log.Printf("This room was not found\n")
-			return
-		}
-
-		// Room内のユーザーを格納
-		for _, user := range room.Clients {
-			onlineusers = append(onlineusers, user)
-		}
-
-		// Roomに参加しているユーザーの取得
-		var allusers []string
-
-		allusers = append(allusers, "匿名")
-		allprooms, err := model.GetParticipatingRoomByRoomID(msg.RoomID)
-		if err != nil {
-			log.Printf("GetParticipatingRoomByRoomID error: %v", err)
-			return
-		}
-
-		// ユーザーを格納
-		for _, prm := range allprooms {
-			allusers = append(allusers, prm.UserName)
+			continue
 		}
 
 		// チャットログを出力と保存 日時、サーバー名、ユーザー名、宛先、メッセージ
@@ -615,7 +559,7 @@ func HandleMessages() {
 			for client, name := range room.Clients {
 				if msg.ToName == name || msg.Name == name {
 					// メッセージを返信する
-					err := websocket.JSON.Send(client, entity.Message{RoomID: room.ID, Message: msg.Message, Name: msg.Name, ToName: msg.ToName, AllUsers: allusers, OnlineUsers: onlineusers})
+					err := websocket.JSON.Send(client, entity.Message{RoomID: room.ID, Message: msg.Message, Name: msg.Name, ToName: msg.ToName, AllUsers: msg.AllUsers, OnlineUsers: msg.OnlineUsers})
 					if err != nil {
 						log.Printf("Send error:%v\n", err)
 					}
@@ -625,7 +569,7 @@ func HandleMessages() {
 			// 接続中のクライアントにメッセージを送る
 			for client := range room.Clients {
 				// メッセージを返信する
-				err := websocket.JSON.Send(client, entity.Message{RoomID: room.ID, Message: msg.Message, Name: msg.Name, ToName: "", AllUsers: allusers, OnlineUsers: onlineusers})
+				err := websocket.JSON.Send(client, entity.Message{RoomID: room.ID, Message: msg.Message, Name: msg.Name, ToName: "", AllUsers: msg.AllUsers, OnlineUsers: msg.OnlineUsers})
 				if err != nil {
 					log.Printf("Send error:%v\n", err)
 				}
@@ -651,7 +595,7 @@ func RoomsList(w http.ResponseWriter, r *http.Request) {
 		// jsonに変換
 		sentjson, err := json.Marshal(roomslist)
 		if err != nil {
-			log.Printf("json.Marshal error: %v", err)
+			log.Printf("json.Marshal error: %v\n", err)
 			http.Error(w, "json.Marshal error", http.StatusInternalServerError)
 			return
 		}

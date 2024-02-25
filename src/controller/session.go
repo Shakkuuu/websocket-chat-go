@@ -25,7 +25,7 @@ func SessionToGetName(r *http.Request) (string, error) {
 	// セッション読み取り
 	session, err = store.Get(r, SESSION_NAME)
 	if err != nil {
-		log.Printf("store.Get error: %v", err)
+		log.Printf("store.Get error: %v\n", err)
 		return "", err
 	}
 
