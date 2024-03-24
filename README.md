@@ -12,9 +12,7 @@ WebosocketとGo言語を主に使用した、リアルタイム性のあるチ�
 
 デプロイしたサービスのURLは[こちら](https://shakku-websocket-chat.onrender.com/)。
 
-プログラムの細かい解説はQiitaの[この記事](https://qiita.com/Shakku)をご覧ください。
-
-※2024/02/20 記事未作成。
+プログラムの細かい解説はQiitaの[この記事](https://qiita.com/Shakku/items/a63a292639478dc9cc4f)をご覧ください。
 
 ## ディレクトリ構成
 
