@@ -3,7 +3,7 @@ const protocol = location.protocol;
 const domain = location.hostname;
 const port = location.port;
 
-let roomid = "";
+let room_id = "";
 let Name = "";
 
 // サーバーに接続
@@ -28,7 +28,7 @@ window.onload = function () {
         socket.onmessage = function (event) {
             // サーバーからメッセージを受け取る
             const msg = JSON.parse(event.data);
-            updateMessage(msg.roomID, msg.message, msg.name, msg.toname, msg.allusers, msg.onlineusers);
+            updateMessage(msg.roomid, msg.message, msg.name, msg.toname, msg.allusers, msg.onlineusers);
         };
     })
     .catch(error => {
@@ -41,16 +41,16 @@ window.onload = function () {
 function joinRoom() {
     let url_string = location.href;
     let url = new URL(url_string);
-    roomid = url.searchParams.get("roomid");
-    document.getElementById("current_server").textContent = roomid
+    room_id = url.searchParams.get("roomid");
+    document.getElementById("current_server").textContent = room_id
 
     document.getElementById("username").textContent = Name
-    const message = { roomID: roomid, name: Name};
+    const message = { roomid: room_id, name: Name};
     socket.send(JSON.stringify(message));
 }
 
 // メッセージ欄を更新する
-function updateMessage(roomID, message, name, toname, aus, ous) {
+function updateMessage(roomid, message, name, toname, aus, ous) {
     const allusers = aus;
     const onlineusers = ous;
 
@@ -87,7 +87,7 @@ function updateMessage(roomID, message, name, toname, aus, ous) {
     };
 
     let listName = document.createElement("li");
-    let nameText = document.createTextNode(roomID + " : " + name + "→" + toname);
+    let nameText = document.createTextNode(roomid + " : " + name + "→" + toname);
     listName.appendChild(nameText);
 
     let messages = document.createElement("ul");
@@ -114,12 +114,12 @@ function send() {
     let sendToName = document.getElementById("toname");
     let stn = sendToName.value;
     if (stn != "") { // プライベートメッセージだったら
-        const message = { roomID: roomid, message: msg, name : Name, toname : stn};
+        const message = { roomid: room_id, message: msg, name : Name, toname : stn};
         socket.send(JSON.stringify(message));
         sendMessage.value = "";
         return;
     }
-    const message = { roomID: roomid, message: msg, name : Name, toname : ""};
+    const message = { roomid: room_id, message: msg, name : Name, toname : ""};
     socket.send(JSON.stringify(message));
     sendMessage.value = "";
 }
@@ -136,4 +136,18 @@ function showTypingStatus() {
     typingTimer = setTimeout(() => {
         document.getElementById("inputStatus").style.display = "none";
     }, typingTimeout);
+}
+
+// Roomの削除または離脱
+function deleteorleaveRoom(){
+    let rid = room_id;
+	if(window.confirm('本当にRoomを削除または離脱しますか？(Roomの作成者の場合はRoomが削除されます。)')){
+		window.location.href = protocol + "//" + domain + ":" + port + '/deleteroom?roomid=' + rid;
+        window.location.href = protocol + "//" + domain + ":" + port + '/leaveroom?roomid=' + rid;
+        return
+	}
+	else{
+		window.alert('キャンセルされました');
+        return
+	}
 }

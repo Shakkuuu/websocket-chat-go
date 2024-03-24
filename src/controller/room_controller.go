@@ -313,10 +313,28 @@ func DeleteRoom(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		// 部屋の作成者ではない場合は、部屋から離脱
 		if !proom.IsMaster {
+			// 部屋離脱
+			err = model.DeleteParticipatingRoomByUserNameAndRoomID(user.Name, roomid)
+			if err != nil {
+				log.Printf("model.DeleteParticipatingRoomByUserNameAndRoomID error: %v\n", err)
+				// メッセージをテンプレートに渡す
+				var data entity.Data
+				data.Message = "データベースとの接続に失敗しました。"
+
+				err = troomtop.Execute(w, data)
+				if err != nil {
+					log.Printf("Excute error:%v\n", err)
+					http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
+					return
+				}
+				return
+			}
+
 			// メッセージをテンプレートに渡す
 			var data entity.Data
-			data.Message = "部屋の作成者ではないため、部屋を削除できませんでした。"
+			data.Message = "部屋を離脱しました。"
 
 			err = troomtop.Execute(w, data)
 			if err != nil {
@@ -509,15 +527,45 @@ func HandleConnection(ws *websocket.Conn) {
 				delete(room.Clients, ws) // Roomからそのクライアントを削除
 
 				// 参加しているユーザー一覧とオンラインのユーザー一覧の取得
-				allusers, err := model.GetAllUsers(msg.RoomID)
-				if err != nil {
-					log.Printf("GetAllUsers error: %v\n", err)
+				allusersChan := make(chan interface{})
+				onlineusersChan := make(chan interface{})
+				var allusers []string
+				var onlineusers []string
+				go func() {
+					aus, err := model.GetAllUsers(msg.RoomID)
+					if err != nil {
+						err = fmt.Errorf("GetAllUsers error: %v", err)
+						allusersChan <- err
+						return
+					}
+					allusersChan <- aus
+				}()
+				go func() {
+					ous, err := model.GetOnlineUsers(msg.RoomID)
+					if err != nil {
+						err = fmt.Errorf("GetOnlineUsers error: %v", err)
+						allusersChan <- err
+						return
+					}
+					onlineusersChan <- ous
+				}()
+
+				v1 := <-allusersChan
+				v2 := <-onlineusersChan
+				switch t1 := v1.(type) {
+				case error:
+					log.Println(t1)
 					return
+				case []string:
+					allusers = t1
 				}
-				onlineusers, err := model.GetOnlineUsers(msg.RoomID)
-				if err != nil {
-					log.Printf("GetOnlineUsers error: %v\n", err)
+
+				switch t2 := v2.(type) {
+				case error:
+					log.Println(t2)
 					return
+				case []string:
+					onlineusers = t2
 				}
 
 				// そのクライアントがRoomから退出したことをそのRoomにブロードキャスト

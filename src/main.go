@@ -89,7 +89,6 @@ func main() {
 
 func loadEnv() (string, string, string, string, string, string, string) {
 	// Docker-compose.ymlでDocker起動時に設定した環境変数の取得
-	// dbms := os.Getenv("DB_DBMS")           // データベースの種類
 	username := os.Getenv("DB_USERNAME")   // データベースのユーザー名
 	userpass := os.Getenv("DB_USERPASS")   // データベースのユーザーのパスワード
 	protocol := os.Getenv("DB_PROTOCOL")   // データベースの使用するプロトコル

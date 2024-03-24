@@ -33,7 +33,7 @@ func Init(host, user, password, database, dbport string) {
 			fmt.Print(".")
 			time.Sleep(time.Second)
 			count++
-			if count > 180 { // countgaが180になるまでリトライ
+			if count > 180 { // countが180になるまでリトライ
 				fmt.Println("")
 				log.Printf("db Init error: %v\n", err)
 				panic(err)
@@ -51,7 +51,7 @@ func Init(host, user, password, database, dbport string) {
 	fmt.Println("DB接続完了")
 }
 
-// serviceでデータベースとやりとりする用
+// modelでデータベースとやりとりする用
 func GetDB() *gorm.DB {
 	return db
 }

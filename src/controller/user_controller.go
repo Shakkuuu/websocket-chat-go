@@ -637,31 +637,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Room一覧取得
-		rooms := model.GetRooms()
-
 		err = model.HashPassCheck(user.Password, password)
-		if err == nil {
-			// Room一覧とメッセージをテンプレートに渡す
-			var data entity.Data
-			for k := range rooms {
-				data.Rooms = append(data.Rooms, k)
-			}
-
-			data.Message = "ログインに成功しました。"
-
-			session, _ = store.Get(r, SESSION_NAME)
-			session.Values["username"] = username
-			session.Save(r, w)
-
-			err = troomtop.Execute(w, data)
-			if err != nil {
-				log.Printf("Excute error:%v\n", err)
-				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
-				return
-			}
-			return
-		} else {
+		if err != nil {
 			// メッセージをテンプレートに渡す
 			var data entity.Data
 			data.Message = "パスワードが違います"
@@ -672,6 +649,23 @@ func Login(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 				return
 			}
+			return
+		}
+
+		// ログイン成功時の処理
+
+		// メッセージをテンプレートに渡す
+		var data entity.Data
+		data.Message = "ログインに成功しました。"
+
+		session, _ = store.Get(r, SESSION_NAME)
+		session.Values["username"] = username
+		session.Save(r, w)
+
+		err = troomtop.Execute(w, data)
+		if err != nil {
+			log.Printf("Excute error:%v\n", err)
+			http.Error(w, "ページの表示に失敗しました。", http.StatusInternalServerError)
 			return
 		}
 	default:

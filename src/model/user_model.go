@@ -158,3 +158,17 @@ func DeleteParticipatingRoomByUserName(username string) error {
 
 	return nil
 }
+
+// 参加中RoomをUserNameとRoomIDから削除
+func DeleteParticipatingRoomByUserNameAndRoomID(username, roomid string) error {
+	db := db.GetDB()
+
+	var p entity.ParticipatingRoom
+
+	err := db.Where("user_name = ?", username).Where("room_id = ?", roomid).Delete(&p).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

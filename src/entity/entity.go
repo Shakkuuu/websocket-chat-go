@@ -12,26 +12,19 @@ type ChatRoom struct {
 
 // HTMLテンプレートに渡すためのデータ
 type Data struct {
-	Rooms   []string
-	RoomID  string
 	Name    string
 	Message string
 }
 
 // クライアントサーバ間でやりとりするメッセージ
 type Message struct {
-	RoomID      string   `json:"roomID"`
+	RoomID      string   `json:"roomid"`
 	Message     string   `json:"message"`
 	Name        string   `json:"name"`
 	ToName      string   `json:"toname"`
 	AllUsers    []string `json:"allusers"`
 	OnlineUsers []string `json:"onlineusers"`
 }
-
-// // Room内のユーザー一覧送信用
-// type SentRoomUsersList struct {
-// 	UsersList []string `json:"userslist"`
-// }
 
 // ルーム一覧送信用
 type SentRoomsList struct {
