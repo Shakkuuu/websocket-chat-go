@@ -46,7 +46,7 @@ func main() {
 		log.Printf("logfile os.OpenFile error:%v\n", err)
 		os.Exit(1)
 	}
-	defer errorfile.Close()
+	defer chatfile.Close()
 
 	// ログの先頭に日付時刻とファイル名、行数を表示するように設定
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
