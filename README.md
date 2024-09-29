@@ -8,9 +8,11 @@ WebosocketとGo言語を主に使用した、リアルタイム性のあるチ�
 
 ユーザーを指定することで、そのRoom内で指定したユーザーにのみ表示されるプライベートメッセージを送信することもできる。
 
-サービスは[Render](https://render.com/)というPassSサービスにデプロイしており、ユーザーやRoomのDB保存はRender内のPostgreSQLサービスを使用している。
+~~サービスは[Render](https://render.com/)というPassSサービスにデプロイしており、ユーザーやRoomのDB保存はRender内のPostgreSQLサービスを使用している。~~
 
-デプロイしたサービスのURLは[こちら](https://shakku-websocket-chat.onrender.com/)。
+~~デプロイしたサービスのURLは[こちら](https://shakku-websocket-chat.onrender.com/)。~~
+
+Renderへのデプロイは現在停止中。別のパブリッククラウドに移行しました。[https://chat.shakku.com](https://chat.shakku.com)
 
 プログラムの細かい解説はQiitaの[この記事](https://qiita.com/Shakku/items/a63a292639478dc9cc4f)をご覧ください。
 
