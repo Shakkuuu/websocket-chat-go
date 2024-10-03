@@ -13,6 +13,7 @@ WebosocketとGo言語を主に使用した、リアルタイム性のあるチ�
 ~~デプロイしたサービスのURLは[こちら](https://shakku-websocket-chat.onrender.com/)。~~
 
 Renderへのデプロイは現在停止中。別のパブリッククラウドに移行しました。[https://chat.shakku.com](https://chat.shakku.com)
+また、実装を修正しました。[https://github.com/Shakkuuu/websocket-chat-go-clean](https://github.com/Shakkuuu/websocket-chat-go-clean)
 
 プログラムの細かい解説はQiitaの[この記事](https://qiita.com/Shakku/items/a63a292639478dc9cc4f)をご覧ください。
 

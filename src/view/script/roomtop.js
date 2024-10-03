@@ -49,3 +49,15 @@ function enterRoom() {
 
     sendroomid.value = "";
 }
+
+// Room削除
+function deleteRoom() {
+    let deleteRoomid = document.getElementById("delete_roomid");
+    let rid = deleteRoomid.value;
+    if (rid == "") {
+        return;
+    }
+    window.location.href = protocol + "//" + domain + ":" + port + '/deleteroom?roomid=' + rid;
+
+    deleteRoomid.value = "";
+}
